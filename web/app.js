@@ -80,13 +80,15 @@
 
   // ---------- вкладки ----------
   let tabs = [{ kind: 'graph' }], active = 0;
-  const tabTitle = (t) => t.kind === 'graph' ? 'Граф' : t.kind === 'plan' ? 'План ВКР' : titleOf(t.id);
-  const tabIcon = (t) => t.kind === 'graph' ? '◉' : t.kind === 'plan' ? '☰' : t.kind === 'mine' ? '✎' : '◇';
+  const tabTitle = (t) => t.kind === 'graph' ? 'Граф' : t.kind === 'plan' ? 'План ВКР' : t.kind === 'learn' ? 'Учиться' : titleOf(t.id);
+  const tabIcon = (t) => t.kind === 'graph' ? '◉' : t.kind === 'plan' ? '☰' : t.kind === 'mine' ? '✎' : t.kind === 'learn' ? '★' : '◇';
   function renderTabs() {
     $('tabs').replaceChildren(...tabs.map((t, i) => el('button', { className: 'tab' + (i === active ? ' on' : ''), title: tabTitle(t), onclick: () => activate(i) },
       el('b', { textContent: tabIcon(t) }), el('span', { textContent: tabTitle(t) }),
       t.kind === 'graph' ? null : el('i', { className: 'x', textContent: '✕', onclick: (e) => { e.stopPropagation(); closeTab(i); } }))));
     $('tabs').children[active]?.scrollIntoView({ inline: 'nearest' });
+    document.querySelector('.tabbar').dataset.title = tabs[active] ? tabTitle(tabs[active]) : '';
+    syncBottomNav();
   }
   function openTab(tab) {
     let i = tabs.findIndex((t) => t.kind === tab.kind && t.id === tab.id);
@@ -100,7 +102,9 @@
   function activate(i) {
     active = Math.max(0, i);
     const t = tabs[active];
-    for (const [k, pane] of [['graph', 'graph-pane'], ['note', 'note-pane'], ['plan', 'plan-pane'], ['mine', 'mine-pane']]) $(pane).hidden = t.kind !== k;
+    for (const [k, pane] of [['graph', 'graph-pane'], ['note', 'note-pane'], ['plan', 'plan-pane'], ['mine', 'mine-pane'], ['learn', 'learn-pane']]) $(pane).hidden = t.kind !== k;
+    document.body.classList.remove('m-tree');
+    if (t.kind === 'learn') { history.replaceState(null, '', '#learn'); renderLearn(); }
     if (t.kind === 'graph') { history.replaceState(null, '', '#graph'); setTimeout(resizeGraphs, 0); }
     if (t.kind === 'plan') history.replaceState(null, '', '#plan');
     if (t.kind === 'note') renderNote(t.id);
@@ -111,7 +115,7 @@
   function go(id) {
     if (isMine(id) && mineById(id)) openTab({ kind: 'mine', id });
     else if (T[id]) openTab({ kind: 'note', id });
-    if (innerWidth < 760) { layout.left = false; applyLayout(); }
+    document.body.classList.remove('m-tree');
   }
 
   // ---------- дерево ----------
@@ -123,7 +127,7 @@
       count != null ? el('span', { className: 'n', textContent: count }) : null), el('div', { className: 'kids' }, ...kids));
     return f;
   }
-  const termRow = (id) => { const r = row({ title: T[id].simple, onclick: () => go(id) }, el('span', { className: 'lbl', textContent: T[id].term })); r.dataset.id = id; return r; };
+  const termRow = (id) => { const r = row({ title: T[id].simple, onclick: () => go(id) }, el('span', { className: 'lbl', textContent: T[id].term }), el('span', { className: 'known-mark', textContent: '' })); r.dataset.id = id; return r; };
   for (const [c, name] of Object.entries(CATS)) {
     const ids = terms.filter((t) => t.category === c).map((t) => t.id).sort(sortRu);
     $('tree-files').append(folder(name, COLOR[c], ids.length, ids.map(termRow)));
@@ -161,8 +165,7 @@
   }
 
   // ---------- панели ----------
-  const layout = store.get('vkr-layout', { left: innerWidth > 760, right: innerWidth > 1100 });
-  if (innerWidth < 760) layout.left = false;
+  const layout = store.get('vkr-layout', { left: true, right: innerWidth > 1100 });
   function applyLayout() { $('app').classList.toggle('no-left', !layout.left); $('app').classList.toggle('no-right', !layout.right); setTimeout(resizeGraphs, 230); }
   $('toggle-left').onclick = () => { layout.left = !layout.left; store.set('vkr-layout', layout); applyLayout(); };
   $('toggle-right').onclick = () => { layout.right = !layout.right; store.set('vkr-layout', layout); applyLayout(); };
@@ -462,6 +465,8 @@
         ...t.incoming.map((r) => el('li', {}, el('span', { className: 'rk', textContent: `← ${r.label}` }), wl(r.from.id)))),
       el('h2', { textContent: 'Источники' }),
       el('ol', { className: 'srcs' }, ...t.sources.map((s) => el('li', {}, s.url ? el('a', { href: s.url, target: '_blank', rel: 'noopener', textContent: s.title }) : s.title))),
+      el('div', { className: 'ask' }, el('button', { className: 'btn', textContent: '✦ Спросить Claude про этот термин', onclick: () => askClaude(id) }), ' ',
+        el('button', { className: 'btn', textContent: mastered(id) ? '✓ Изучено' : '★ Учить этот термин', onclick: () => { openTab({ kind: 'learn' }); startSession('cards', [id]); } })),
       notesBlock(id),
       el('div', { className: 'api-line' }, 'JSON: ', el('a', { href: jsonUrl, target: '_blank', textContent: jsonUrl })),
     ].filter(Boolean));
@@ -601,12 +606,157 @@
   $('export-vault').onclick = () => download('vkr-glossary-obsidian.zip', zip(vaultFiles()));
   window.__vaultFiles = vaultFiles;  // для автотеста экспорта
 
+
+  // ---------- телефон: нижняя навигация ----------
+  const isM = () => innerWidth < 760;
+  function setMobile() { document.body.classList.toggle('m', isM()); resizeGraphs(); }
+  addEventListener('resize', setMobile);
+  function syncBottomNav() {
+    const k = document.body.classList.contains('m-tree') ? 'tree' : tabs[active]?.kind === 'note' ? 'tree' : tabs[active]?.kind;
+    document.querySelectorAll('[data-m]').forEach((b) => b.classList.toggle('on', b.dataset.m === k));
+  }
+  document.querySelectorAll('[data-m]').forEach((b) => { b.onclick = () => {
+    const k = b.dataset.m;
+    if (k === 'graph') activate(0);
+    else if (k === 'plan') openTab({ kind: 'plan' });
+    else if (k === 'learn') openTab({ kind: 'learn' });
+    else { document.querySelector(`[data-tree="${k === 'mine' ? 'mine' : 'files'}"]`).click(); document.body.classList.add('m-tree'); }
+    syncBottomNav();
+  }; });
+
+  // ---------- обучение: карточки с интервальным повторением и тесты ----------
+  const LEARN_KEY = 'vkr-learn-v1';
+  const L = store.get(LEARN_KEY, { box: {}, seen: {} });
+  const saveL = () => { store.set(LEARN_KEY, L); markKnown(); };
+  const boxOf = (id) => L.box[id] || 0;
+  const mastered = (id) => boxOf(id) >= 3;
+  const course = [];  // порядок изучения = порядок плана ВКР
+  for (const ch of plan) for (const s of ch.sections || [{ id: ch.id, title: 'Введение', terms: ch.terms }]) {
+    course.push({ id: s.id, title: s.id === 'intro' ? 'Введение' : `${s.id} ${s.title}`, ids: s.terms.map((x) => x.id) });
+  }
+  const order = [...new Set(course.flatMap((c) => c.ids))];
+  function markKnown() {
+    document.querySelectorAll('.tree .row[data-id]').forEach((r) => { const m = r.querySelector('.known-mark'); if (m) m.textContent = mastered(r.dataset.id) ? '✓' : ''; });
+    const n = order.filter(mastered).length;
+    $('learn-progress').textContent = `${n}/${order.length}`;
+  }
+  markKnown();
+  $('learn-entry').onclick = () => openTab({ kind: 'learn' });
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  function grade(id, g) {  // g: 0 — не знаю, 1 — почти, 2 — знаю
+    L.box[id] = g === 0 ? 1 : g === 1 ? Math.max(1, boxOf(id)) : Math.min(5, boxOf(id) + 1);
+    L.seen[id] = Date.now(); saveL();
+  }
+  function askClaude(id) {
+    const t = T[id];
+    const text = `Объясни мне термин «${t.term}» (${t.en}) простыми словами и на примере моей ВКР: «Динамическое распределение вычислений между браузерным расширением и сервером при распознавании речи». Определение из моего глоссария: ${t.definition} Приведи аналогию из жизни, скажи, где этот термин появится в тексте ВКР, и задай мне 2 проверочных вопроса.`;
+    navigator.clipboard?.writeText(text).then(() => toast('Вопрос скопирован — вставьте его в чат с Claude'), () => prompt('Скопируйте вопрос для Claude:', text));
+  }
+  function toast(msg) {
+    const d = el('div', { textContent: msg, style: 'position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:#2f2f2f;border:1px solid #444;color:#eee;padding:10px 16px;border-radius:10px;z-index:80;font-size:14px;max-width:90vw;text-align:center' });
+    document.body.append(d); setTimeout(() => d.remove(), 2600);
+  }
+  let session = null;
+  function startSession(mode, ids) {
+    const q = ids.slice(0, 10);
+    if (!q.length) { toast('Здесь всё изучено — выберите другой раздел или режим'); return; }
+    session = { mode, q, i: 0, right: 0, revealed: false, answered: null };
+    renderLearn();
+  }
+  const nextLesson = () => course.find((c) => c.ids.some((id) => !mastered(id)));
+  function renderLearn() {
+    const box = $('learn');
+    if (session) return renderSession(box);
+    const n = order.length, done = order.filter(mastered).length, inProg = order.filter((id) => boxOf(id) > 0 && !mastered(id)).length;
+    const lesson = nextLesson();
+    const hard = order.filter((id) => boxOf(id) === 1);
+    const mode = (title, sub, fn) => el('button', { className: 'mode', onclick: fn }, el('b', { textContent: title }), el('span', { textContent: sub }));
+    box.replaceChildren(
+      el('h1', { textContent: 'Учиться по глоссарию' }),
+      el('p', { className: 'lead', textContent: 'Курс идёт по плану ВКР: от введения к результатам. Термин считается изученным, когда вы трижды подряд ответили «знаю». Прогресс хранится в этом браузере.' }),
+      el('div', { className: 'bar' }, el('i', { style: `width:${(100 * done / n).toFixed(1)}%` })),
+      el('div', { className: 'stat-row' },
+        el('div', { className: 'stat' }, el('b', { textContent: `${done} / ${n}` }), el('span', { textContent: 'изучено' })),
+        el('div', { className: 'stat' }, el('b', { textContent: inProg }), el('span', { textContent: 'в процессе' })),
+        el('div', { className: 'stat' }, el('b', { textContent: hard.length }), el('span', { textContent: 'сложных — повторить' }))),
+      el('div', { className: 'modes' },
+        mode(lesson ? `▶ Урок: ${lesson.title}` : '✓ Все уроки пройдены', lesson ? 'Карточки: термин → вспомнить → проверить себя' : 'Повторите сложные или пройдите тест',
+          () => lesson && startSession('cards', lesson.ids.filter((id) => !mastered(id)))),
+        mode('? Тест: что это значит', 'Термин → выбрать правильное объяснение из четырёх', () => startSession('quiz', shuffle(order.filter((id) => !mastered(id)).slice(0, 30)))),
+        mode('⇄ Тест наоборот', 'Объяснение → угадать термин', () => startSession('reverse', shuffle(order.filter((id) => boxOf(id) > 0).concat(order.filter((id) => !boxOf(id))).slice(0, 30)))),
+        mode('↻ Повторить сложные', hard.length ? `${hard.length} терминов, где вы ошибались` : 'Пока нет — отлично', () => startSession('cards', shuffle(hard)))),
+      el('h2', { textContent: 'По главам ВКР' }),
+      el('div', { className: 'chapters' }, ...course.map((c) => {
+        const d = c.ids.filter(mastered).length;
+        return el('div', { className: 'ch' }, el('div', { className: 't', textContent: c.title }, el('small', { textContent: `${d} из ${c.ids.length} изучено` })),
+          el('div', { className: 'bar' }, el('i', { style: `width:${(100 * d / c.ids.length).toFixed(0)}%` })),
+          el('button', { className: 'btn', textContent: d === c.ids.length ? 'Повторить' : 'Учить', onclick: () => startSession('cards', d === c.ids.length ? shuffle(c.ids.slice()) : c.ids.filter((id) => !mastered(id))) }));
+      })),
+      el('p', { className: 'lead', style: 'margin-top:20px', textContent: 'Непонятно даже после объяснения — нажмите «Спросить Claude» на карточке: вопрос скопируется, и мы разберём термин в чате на примере вашей ВКР.' }),
+      el('button', { className: 'btn danger', textContent: 'Сбросить прогресс', onclick: () => { if (confirm('Сбросить прогресс обучения?')) { L.box = {}; L.seen = {}; saveL(); renderLearn(); } } }),
+    );
+    $('learn-pane').scrollTop = 0;
+  }
+  function renderSession(box) {
+    const s = session, id = s.q[s.i], t = T[id];
+    const top = el('div', { className: 'session-top' }, el('button', { className: 'btn', textContent: '← К урокам', onclick: () => { session = null; renderLearn(); } }),
+      el('div', { className: 'bar' }, el('i', { style: `width:${(100 * s.i / s.q.length).toFixed(0)}%` })), `${s.i + 1} / ${s.q.length}`);
+    const next = () => { s.i++; s.revealed = false; s.answered = null; if (s.i >= s.q.length) { const r = s; session = null; renderDone(box, r); } else renderLearn(); };
+    const where = t.vkr.map((x) => course.find((c) => c.id === x)?.title).filter(Boolean).join(' · ');
+    const answer = () => el('div', { className: 'ans' },
+      el('div', { className: 'callout' }, el('div', { className: 'ct', textContent: '💡 Простыми словами' }), el('p', { textContent: t.simple })),
+      el('p', { textContent: t.definition }),
+      el('p', { className: 'muted', textContent: `Где в ВКР: ${where}` }));
+    const tools = el('div', { className: 'ask' }, el('button', { className: 'btn', textContent: 'Открыть заметку', onclick: () => go(id) }), ' ',
+      el('button', { className: 'btn', textContent: '✦ Спросить Claude', onclick: () => askClaude(id) }));
+    let card;
+    if (s.mode === 'cards') {
+      card = el('div', { className: 'card' }, el('div', { className: 'cat', style: `color:${COLOR[t.category]}`, textContent: CATS[t.category] }),
+        el('div', { className: 'q', textContent: t.term }), el('div', { className: 'en', textContent: t.en !== t.term ? t.en : '' }),
+        s.revealed ? answer() : el('p', { className: 'muted', textContent: 'Вспомните, что это значит, — потом проверьте себя.' }));
+      const actions = s.revealed
+        ? el('div', { className: 'learn-actions' },
+          el('button', { className: 'btn bad', textContent: '✗ Не знаю', onclick: () => { grade(id, 0); s.q.push(id); next(); } }),
+          el('button', { className: 'btn mid', textContent: '~ Почти', onclick: () => { grade(id, 1); next(); } }),
+          el('button', { className: 'btn good', textContent: '✓ Знаю', onclick: () => { grade(id, 2); s.right++; next(); } }))
+        : el('button', { className: 'btn primary', style: 'width:100%;padding:12px', textContent: 'Показать ответ', onclick: () => { s.revealed = true; renderLearn(); } });
+      box.replaceChildren(top, card, actions, tools);
+    } else {
+      const reverse = s.mode === 'reverse';
+      s.opts ??= {};
+      if (!s.opts[s.i]) {
+        const same = terms.filter((x) => x.id !== id && x.category === t.category), other = terms.filter((x) => x.id !== id && x.category !== t.category);
+        s.opts[s.i] = shuffle([t, ...shuffle(same).slice(0, 2), ...shuffle(other).slice(0, 1)]);
+      }
+      const opts = s.opts[s.i];
+      card = el('div', { className: 'card' },
+        el('div', { className: 'cat', style: `color:${COLOR[t.category]}`, textContent: reverse ? 'Какой это термин?' : 'Что значит этот термин?' }),
+        el('div', { className: 'q', style: reverse ? 'font-size:19px;font-weight:500' : '', textContent: reverse ? t.simple : t.term }),
+        el('div', { className: 'opts' }, ...opts.map((o) => {
+          const b = el('button', { className: 'opt', textContent: reverse ? o.term : o.simple });
+          if (s.answered) { if (o.id === id) b.classList.add('right'); else if (o.id === s.answered) b.classList.add('wrong'); }
+          else b.onclick = () => { s.answered = o.id; const ok = o.id === id; grade(id, ok ? 2 : 0); if (ok) s.right++; renderLearn(); };
+          return b;
+        })),
+        s.answered ? answer() : null);
+      box.replaceChildren(top, card, s.answered ? el('button', { className: 'btn primary', style: 'width:100%;padding:12px', textContent: 'Дальше →', onclick: next }) : null, tools);
+    }
+    $('learn-pane').scrollTop = 0;
+  }
+  function renderDone(box, s) {
+    box.replaceChildren(el('h1', { textContent: 'Готово!' }),
+      el('p', { className: 'lead', textContent: `Правильно: ${s.right} из ${s.q.length}. Изучено всего: ${order.filter(mastered).length} из ${order.length}.` }),
+      el('button', { className: 'btn primary', textContent: 'К урокам', onclick: () => renderLearn() }));
+  }
+
   // ---------- старт: по ссылке сразу открывается граф ----------
+  setMobile();
   applyLayout();
   addEventListener('hashchange', () => { const h = decodeURIComponent(location.hash.slice(1)); if ((T[h] || mineById(h)) && tabs[active]?.id !== h) go(h); });
   renderTabs();
   const h0 = decodeURIComponent(location.hash.slice(1));
   if (T[h0] || mineById(h0)) go(h0);
   else if (h0 === 'plan') openTab({ kind: 'plan' });
+  else if (h0 === 'learn') openTab({ kind: 'learn' });
   else { activate(0); sidePanel('adaptive-strategy'); }
 })();

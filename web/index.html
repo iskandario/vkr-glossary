@@ -24,6 +24,7 @@
         <button data-tree="vkr">План ВКР</button>
         <button data-tree="mine">Мои</button>
       </div>
+      <button class="learn-entry" id="learn-entry">★ Учиться по глоссарию <span id="learn-progress"></span></button>
       <nav id="tree-files" class="tree"></nav>
       <nav id="tree-vkr" class="tree" hidden></nav>
       <nav id="tree-mine" class="tree" hidden></nav>
@@ -56,6 +57,7 @@
       <section class="pane note-pane" id="note-pane" hidden><article class="note" id="note"></article></section>
       <section class="pane note-pane" id="plan-pane" hidden><article class="note" id="plan"></article></section>
       <section class="pane note-pane" id="mine-pane" hidden><article class="note" id="mine"></article></section>
+      <section class="pane note-pane" id="learn-pane" hidden><article class="note learn" id="learn"></article></section>
     </main>
 
     <!-- правая панель -->
@@ -69,6 +71,15 @@
       <div id="outlinks" class="links"></div>
     </aside>
   </div>
+
+  <!-- нижняя навигация (телефон) -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button data-m="graph" class="on"><b>◉</b>Граф</button>
+    <button data-m="tree"><b>☷</b>Темы</button>
+    <button data-m="plan"><b>☰</b>План</button>
+    <button data-m="learn"><b>★</b>Учиться</button>
+    <button data-m="mine"><b>✎</b>Мои</button>
+  </nav>
 
   <!-- быстрый переход -->
   <div class="modal" id="switcher" hidden>
