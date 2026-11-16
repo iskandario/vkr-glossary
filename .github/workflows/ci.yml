@@ -1,0 +1,41 @@
+# Пайплайн: тесты -> сборка OCI-образа -> проверка контейнера -> публикация в GHCR (только main)
+name: ci
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test-build-publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with: {version: "0.13.6"}
+      - name: Тесты данных и API
+        run: uv run --frozen pytest -q
+      - name: Сборка образа
+        run: docker build -t vkr-glossary:ci .
+      - name: Проверка контейнера (read-only, non-root)
+        run: |
+          docker run -d --name g -p 8080:8080 --read-only --tmpfs /tmp vkr-glossary:ci
+          for i in $(seq 1 20); do curl -sf localhost:8080/health && break; sleep 1; done
+          curl -sf localhost:8080/dictionary/WER | grep -q "Доля ошибочных слов"
+          curl -sf localhost:8080/api/stats | grep -q '"terms":95'
+          test "$(docker exec g id -u)" = "10001"
+      - name: Публикация в GHCR
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          IMG=ghcr.io/${{ github.repository_owner }}/vkr-glossary
+          docker tag vkr-glossary:ci $IMG:${{ github.sha }}
+          docker tag vkr-glossary:ci $IMG:latest
+          docker push $IMG:${{ github.sha }} && docker push $IMG:latest
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then docker tag vkr-glossary:ci $IMG:${GITHUB_REF_NAME#v}; docker push $IMG:${GITHUB_REF_NAME#v}; fi
+          docker inspect --format '{{index .RepoDigests 0}}' $IMG:${{ github.sha }} | tee -a $GITHUB_STEP_SUMMARY
