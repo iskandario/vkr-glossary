@@ -4,48 +4,60 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Глоссарий ВКР — граф терминов</title>
+  <meta name="description" content="95 терминов ВКР о распознавании речи в браузере и на сервере: простыми словами, строгие определения, связи и источники">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header class="top">
     <div class="brand">
       <h1>Глоссарий ВКР</h1>
-      <p>Распределение распознавания речи между браузерным расширением и сервером</p>
+      <p>Распознавание речи: в браузере или на сервере — все термины работы простыми словами</p>
     </div>
     <div class="search">
-      <input id="q" type="search" placeholder="Найти термин: WebGPU, задержка, p95…" autocomplete="off" aria-label="Поиск термина">
+      <input id="q" type="search" placeholder="Найти термин: задержка, Whisper, WebGPU…" autocomplete="off" aria-label="Поиск термина">
       <ul id="suggest" class="suggest" role="listbox" hidden></ul>
     </div>
     <nav class="views" aria-label="Вид">
       <button data-view="graph" class="on">Граф</button>
+      <button data-view="vkr">План ВКР</button>
       <button data-view="list">Список</button>
-      <a href="/docs" target="_blank" rel="noopener">API</a>
+      <a id="api-link" href="/docs" target="_blank" rel="noopener">API</a>
     </nav>
   </header>
 
   <main>
     <section id="graph-view" class="view on">
-      <div id="legend" class="legend" aria-label="Категории"></div>
+      <div id="legend" class="legend" aria-label="Темы"></div>
       <div id="cy" aria-label="Граф терминов"></div>
-      <p class="hint">Колесо — масштаб, перетаскивание — сдвиг, клик по узлу — определение и соседи. Пунктир — авторские термины ВКР.</p>
+      <p class="hint">Колёсико — приблизить, клик — открыть термин и его связи, клик по пустому месту — сбросить.</p>
     </section>
+    <section id="vkr-view" class="view" aria-label="План ВКР"><div id="vkr"></div></section>
     <section id="list-view" class="view" aria-label="Список терминов"><div id="list"></div></section>
 
     <aside id="panel" class="panel" aria-live="polite">
-      <div id="panel-empty" class="empty">
-        <p id="stats"></p>
-        <p>Выберите термин на графе или в поиске.</p>
+      <div id="intro">
+        <h2>Что это</h2>
+        <p>Словарь к дипломной работе о том, <b>где распознавать речь</b>: прямо в браузере (приватно, но зависит от мощности ноутбука) или на сервере (быстро, но зависит от интернета). Каждый термин объяснён простыми словами, а ниже — строгое определение с источником.</p>
+        <h3>С чего начать</h3>
+        <div id="start" class="chips"></div>
+        <p id="stats" class="muted"></p>
       </div>
       <article id="card" hidden>
         <p class="cat" id="c-cat"></p>
         <h2 id="c-term"></h2>
         <p class="en" id="c-en"></p>
-        <p class="authored" id="c-authored" hidden>Авторский термин ВКР</p>
+        <p class="badge" id="c-authored" hidden>Термин введён в ВКР</p>
+        <div class="simple"><span>Простыми словами</span><p id="c-simple"></p></div>
+        <h3>Где в ВКР</h3>
+        <div id="c-vkr" class="secs"></div>
+        <h3>Определение</h3>
         <p id="c-def" class="def"></p>
-        <h3>Связи</h3>
-        <ul id="c-rel" class="rel"></ul>
-        <h3>Источники</h3>
-        <ol id="c-src" class="src"></ol>
+        <h3>Связано с</h3>
+        <div id="c-rel" class="chips"></div>
+        <details class="sources">
+          <summary>Источники (<span id="c-nsrc"></span>)</summary>
+          <ol id="c-src"></ol>
+        </details>
         <p class="api">JSON: <a id="c-api" target="_blank" rel="noopener"></a></p>
       </article>
     </aside>

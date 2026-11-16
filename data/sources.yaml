@@ -184,6 +184,22 @@
   type: docs
   title: "GitHub Docs. Understanding GitHub Actions"
   url: https://docs.github.com/en/actions/get-started/understand-github-actions
+- id: chakravarty2024
+  type: paper
+  title: "Chakravarty A. Deep Learning Models in Speech Recognition: Measuring GPU Energy Consumption, Impact of Noise and Model Quantization for Edge Deployment. arXiv:2405.01004, 2024"
+  url: https://doi.org/10.48550/arXiv.2405.01004
+- id: romano2006
+  type: paper
+  title: "Romano J., Kromrey J. D., Coraggio J., Skowronek J. Appropriate Statistics for Ordinal Level Data: Should We Really Be Using t-test and Cohen's d for Evaluating Group Differences on the NSSE and Other Surveys? // Annual Meeting of the Florida Association of Institutional Research, 2006"
+  url: null
+- id: rfc6716
+  type: standard
+  title: "RFC 6716. Definition of the Opus Audio Codec. IETF, 2012"
+  url: https://www.rfc-editor.org/rfc/rfc6716
+- id: whatwg-coi
+  type: standard
+  title: "HTML Living Standard. Cross-origin isolation (COOP/COEP). WHATWG"
+  url: https://html.spec.whatwg.org/multipage/document-sequences.html#cross-origin-isolation-mode
 - id: vkr
   type: vkr
   title: "Гарифуллин И. ВКР «Динамическое распределение вычислений между браузерным расширением и сервером при распознавании речи с учётом производительности устройства и состояния сети» (авторский термин модели, ПР3–ПР4)"

@@ -27,7 +27,7 @@ jobs:
           docker run -d --name glossary -p 8080:8080 --read-only --tmpfs /tmp vkr-glossary:ci
           for i in $(seq 1 20); do curl -sf localhost:8080/health && break; sleep 1; done
           curl -sf localhost:8080/dictionary/WER | grep -q "Доля ошибочных слов"
-          curl -sf localhost:8080/api/stats | grep -q '"terms":95'
+          curl -sf localhost:8080/api/stats | grep -q '"terms":102'
           test "$(docker exec glossary id -u)" = "10001"
       - name: Публикация в GHCR
         if: github.event_name != 'pull_request'

@@ -33,6 +33,7 @@ def dump(path: str, rel: str) -> None:
 
 dump("/api/graph", "api/graph.json")
 dump("/api/stats", "api/stats.json")
+dump("/api/vkr", "api/vkr.json")
 dump("/api/categories", "api/categories.json")
 dump("/api/sources", "api/sources.json")
 dump("/api/terms?detail=true", "api/terms.json")

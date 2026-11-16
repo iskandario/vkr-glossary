@@ -14,6 +14,8 @@ with sync_playwright() as p:
     pg.screenshot(path=f"{out}/03-search.png")
     pg.keyboard.press("Escape"); pg.click("[data-view=list]"); pg.wait_for_timeout(800)
     pg.screenshot(path=f"{out}/04-list.png")
+    pg.click("[data-view=vkr]"); pg.wait_for_timeout(800)
+    pg.screenshot(path=f"{out}/07-vkr-plan.png")
     pg.goto(base + "/docs"); pg.wait_for_timeout(2500)
     pg.screenshot(path=f"{out}/05-openapi.png")
     m = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2)

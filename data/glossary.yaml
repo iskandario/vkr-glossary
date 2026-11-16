@@ -298,7 +298,7 @@ terms:
   term: "WebGPU"
   en: "WebGPU"
   category: browser
-  definition: "Браузерный API доступа к видеокарте для графики и вычислений; позволяет выполнять нейросети на GPU устройства. По данным исследований ускоряет инференс в браузере в разы по сравнению с Wasm, но доступен не на всех устройствах."
+  definition: "Браузерный API доступа к видеокарте для графики и вычислений; позволяет выполнять нейросети на GPU устройства. По данным исследований может ускорять инференс в браузере в разы по сравнению с Wasm, но доступен не на всех устройствах и браузерах."
   sources: [w3c-webgpu, wang2025, jia2024]
   related:
     - {to: webassembly, type: alternative}
@@ -670,7 +670,7 @@ terms:
   term: "Прогон"
   en: "Run (trial)"
   category: experiment
-  definition: "Однократное выполнение одной конфигурации от начала до конца: прогрев, подача 20 фрагментов в реальном времени, сбор результатов. Единица анализа — значение p95 за прогон."
+  definition: "Однократное выполнение одной конфигурации от начала до конца: прогрев (2 фрагмента), подача 16 фрагментов в реальном времени, сбор результатов. Единица анализа — значение p95 за прогон."
   sources: [jain1991, vkr]
   related:
     - {to: percentile, type: uses}
@@ -728,8 +728,8 @@ terms:
   term: "δ Клиффа"
   en: "Cliff's delta"
   category: experiment
-  definition: "Размер эффекта для порядковых данных — доля пар (a, b), где a > b, минус доля пар, где a < b; от −1 до 1. |δ| < 0,147 — пренебрежимо, < 0,33 — малый, < 0,474 — средний, иначе большой."
-  sources: [cliff1993]
+  definition: "Размер эффекта для порядковых данных — доля пар (a, b), где a > b, минус доля пар, где a < b; от −1 до 1. |δ| < 0,147 — пренебрежимо, < 0,33 — малый, < 0,474 — средний, иначе большой (пороги по Romano et al.)."
+  sources: [cliff1993, romano2006]
   related:
     - {to: mann-whitney, type: related}
 
@@ -804,7 +804,7 @@ terms:
   term: "Артефакт исследования"
   en: "Research artifact"
   category: experiment
-  definition: "Опубликованные вместе с работой код, данные, образы и скрипты, позволяющие проверить результаты; ACM присваивает таким работам значки Available, Functional, Reusable, Reproduced."
+  definition: "Опубликованные вместе с работой код, данные, образы и скрипты, позволяющие проверить результаты; ACM отмечает такие работы значками Artifacts Available, Artifacts Evaluated (Functional, Reusable), Results Reproduced и Results Replicated."
   sources: [acm-badging]
   related:
     - {to: container-image, type: uses}
@@ -921,11 +921,89 @@ terms:
   related:
     - {to: reproducibility, type: affects}
 
-- id: web-api
-  term: "Web API"
-  en: "Web API"
-  category: devops
-  definition: "Программный интерфейс, доступный по HTTP: адреса (эндпоинты), методы и формат данных (обычно JSON). Глоссарий практики отдаёт термины, связи и источники через Web API."
-  sources: [rfc9110]
+# ---------------- добавлено для ВКР ----------------
+- id: rtf
+  term: "Коэффициент реального времени"
+  en: "Real-Time Factor (RTF)"
+  category: asr
+  definition: "Отношение времени распознавания к длительности звука. RTF < 1 — модель успевает за речью; RTF > 1 — не успевает, и при подаче речи в реальном времени копится очередь. В стенде Whisper base в браузере на 1 ядре имеет RTF ≈ 1, на 0,25 ядра ≈ 4."
+  sources: [radford2023, chakravarty2024]
   related:
-    - {to: http, type: uses}
+    - {to: queueing, type: affects}
+    - {to: latency, type: affects}
+    - {to: local-inference, type: measures}
+
+- id: device-profile
+  term: "Профиль устройства"
+  en: "Device profile"
+  category: experiment
+  definition: "Уровень фактора «устройство»: квота CPU клиентского контейнера (D1 — 1 ядро, D2 — 0,5, D3 — 0,25), задаваемая через cgroups. Эмулирует ноутбуки разной мощности при одной и той же программной среде."
+  sources: [vkr, cgroups]
+  authored: true
+  related:
+    - {to: factor, type: is_a}
+    - {to: cgroups, type: uses}
+    - {to: network-profile, type: related}
+
+- id: hypothesis
+  term: "Статистическая гипотеза (H₀ и H₁)"
+  en: "Null and alternative hypothesis"
+  category: experiment
+  definition: "H₀ — утверждение «эффекта нет или он меньше порога», H₁ — его альтернатива, ради проверки которой ставится эксперимент. Направление и порог эффекта (в ВКР — снижение p95 на 20 %) задаются до эксперимента; это делает гипотезу фальсифицируемой и позволяет использовать односторонний тест."
+  sources: [wohlin2012]
+  related:
+    - {to: mann-whitney, type: uses}
+    - {to: mde, type: related}
+
+- id: blocking
+  term: "Блочный план"
+  en: "Blocking"
+  category: experiment
+  definition: "Приём планирования: прогоны группируются в однородные блоки (одна машина, одно условие), и сравнение вариантов идёт внутри блока. В ВКР блок — условие «сеть × устройство» на одном раннере GitHub Actions: все четыре стратегии сравниваются на одном и том же железе."
+  sources: [wohlin2012, jain1991]
+  related:
+    - {to: full-factorial, type: related}
+    - {to: randomization, type: related}
+    - {to: validity-threats, type: affects}
+
+- id: censoring
+  term: "Цензурирование наблюдений"
+  en: "Censoring"
+  category: experiment
+  definition: "Учёт наблюдений, у которых точное значение неизвестно: фрагмент, по которому текст не пришёл, получает задержку, равную пределу ожидания (30 с), а не выбрасывается. Иначе стратегия, теряющая фрагменты, выглядела бы быстрее."
+  sources: [vkr, jain1991]
+  related:
+    - {to: percentile, type: affects}
+    - {to: experiment-run, type: part_of}
+
+- id: opus
+  term: "Кодек Opus"
+  en: "Opus audio codec"
+  category: network
+  definition: "Открытый стандарт сжатия звука (RFC 6716), рассчитанный на речь в реальном времени. При 16–24 кбит/с речь занимает примерно в 10–15 раз меньше места, чем несжатый WAV 16 кГц, что сокращает время отправки на медленном канале."
+  sources: [rfc6716]
+  related:
+    - {to: throughput, type: affects}
+    - {to: server-inference, type: affects}
+
+- id: hedged-requests
+  term: "Хеджирование запросов"
+  en: "Hedged requests"
+  category: distributed
+  definition: "Если ответ задерживается сверх обычного, запрос дублируется на другой исполнитель и берётся первый пришедший результат. Ценой небольшого дополнительного трафика срезает хвост задержки; для ВКР — одновременный запуск локального и серверного распознавания в спорных случаях."
+  sources: [dean2013]
+  related:
+    - {to: tail-latency, type: affects}
+    - {to: fallback, type: alternative}
+    - {to: adaptive-strategy, type: related}
+
+- id: wasm-threads
+  term: "Многопоточный WebAssembly"
+  en: "WebAssembly threads"
+  category: browser
+  definition: "Выполнение Wasm-кода в нескольких потоках через SharedArrayBuffer. Браузер разрешает это только изолированным страницам (заголовки COOP/COEP); ONNX Runtime Web тогда распараллеливает вычисления модели, ускоряя локальное распознавание на многоядерных устройствах."
+  sources: [whatwg-coi, ort-web]
+  related:
+    - {to: webassembly, type: is_a}
+    - {to: local-inference, type: affects}
+    - {to: webgpu, type: alternative}

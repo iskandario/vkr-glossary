@@ -1,0 +1,138 @@
+# План ВКР и привязка терминов к параграфам.
+# Правило: термин остаётся в глоссарии, только если у него есть место в тексте ВКР (проверяется тестом).
+outline:
+  - id: "intro"
+    title: "Введение"
+    about: "Зачем голосовому вводу в браузере выбирать, где распознавать речь; цель, задачи, гипотезы, новизна"
+  - id: "1"
+    title: "1 Распознавание речи в браузере и на сервере: обзор"
+    sections:
+      - {id: "1.1", title: "Распознавание речи и модели Whisper", about: "Как устроено распознавание, что такое Whisper и как мерить качество"}
+      - {id: "1.2", title: "Нейросети в браузере", about: "Чем браузер может исполнять модель: WebAssembly, WebGPU, ONNX Runtime Web; цена холодного старта"}
+      - {id: "1.3", title: "Распределение вычислений между устройством и сервером", about: "Neurosurgeon, SPINN и др.: что уже предложено и чего не хватает для речи в браузере"}
+      - {id: "1.4", title: "Постановка задачи", about: "Фрагменты речи в реальном времени, место выполнения, критерий — задержка и качество"}
+  - id: "2"
+    title: "2 Метод адаптивного распределения фрагментов речи"
+    sections:
+      - {id: "2.1", title: "Модель задержки", about: "Из чего складывается время до текста локально и на сервере; очередь; реальное время"}
+      - {id: "2.2", title: "Оценка состояния сети и устройства", about: "Зонды, сглаживание, оценка канала и скорости модели"}
+      - {id: "2.3", title: "Стратегии S1–S4 и откат на локальное", about: "Правила выбора, срок ответа сервера, работа без сети, приватность"}
+      - {id: "2.4", title: "Архитектура расширения", about: "Manifest V3, offscreen document, воркер, захват звука, обмен с сервером"}
+  - id: "3"
+    title: "3 Экспериментальный стенд и методика"
+    sections:
+      - {id: "3.1", title: "Стенд", about: "Контейнеры, сервер и клиент, эмуляция сети и устройства, мониторинг"}
+      - {id: "3.2", title: "План эксперимента и метрики", about: "Факторы и уровни, прогоны, рандомизация, блоки, p95, WER"}
+      - {id: "3.3", title: "Статистический анализ", about: "Гипотезы, bootstrap, Манн–Уитни, δ Клиффа, Холм"}
+      - {id: "3.4", title: "Воспроизводимость", about: "Образы, lock-файлы, манифест прогона, CI, артефакт по ACM"}
+  - id: "4"
+    title: "4 Результаты и обсуждение"
+    sections:
+      - {id: "4.1", title: "Проверка стенда", about: "A/A-тест, шум и минимальный обнаружимый эффект, стабильность"}
+      - {id: "4.2", title: "Задержка и качество стратегий", about: "Проверка H₁ и H₂, хвосты задержки, WER"}
+      - {id: "4.3", title: "Улучшения", about: "Сжатие звука, многопоточность, WebGPU, хеджирование запросов, потоковая передача"}
+      - {id: "4.4", title: "Угрозы валидности и ограничения", about: "Что могло исказить вывод и как это учтено"}
+
+terms:
+  asr: ["intro", "1.1"]
+  whisper: ["1.1", "3.1"]
+  encoder-decoder: ["1.1", "2.1"]
+  transformer: ["1.1"]
+  log-mel: ["1.1", "2.1"]
+  token: ["1.1", "2.1"]
+  greedy-decoding: ["1.1", "3.1"]
+  beam-search: ["1.1"]
+  wer: ["1.1", "3.2", "4.2"]
+  text-normalization: ["1.1", "3.2"]
+  speech-fragment: ["1.4", "2.1"]
+  vad: ["2.4", "4.3"]
+  golos: ["3.2"]
+  inference: ["1.2"]
+  quantization: ["1.2", "3.1"]
+  int8: ["1.2", "3.1"]
+  onnx: ["1.2"]
+  onnx-runtime-web: ["1.2", "2.4"]
+  transformers-js: ["1.2", "2.4", "3.1"]
+  ctranslate2: ["1.2", "3.1"]
+  faster-whisper: ["1.2", "3.1"]
+  cold-start: ["1.2", "2.1", "4.2"]
+  warmup: ["3.2"]
+  browser-extension: ["intro", "2.4"]
+  manifest-v3: ["2.4"]
+  extension-service-worker: ["2.4"]
+  offscreen-document: ["2.4"]
+  web-worker: ["1.2", "2.4"]
+  webassembly: ["1.2", "3.1"]
+  webgpu: ["1.2", "4.3"]
+  web-audio: ["2.4"]
+  media-capture: ["2.4"]
+  cors: ["2.4"]
+  headless-browser: ["3.1"]
+  playwright: ["3.1"]
+  cdp: ["3.1", "4.4"]
+  edge-computing: ["intro", "1.3"]
+  offloading: ["1.3"]
+  collaborative-inference: ["1.3"]
+  dnn-partitioning: ["1.3"]
+  early-exit: ["1.3"]
+  request-level-split: ["1.4", "2.3"]
+  local-inference: ["1.4", "2.1"]
+  server-inference: ["1.4", "2.1"]
+  scheduler: ["2.3", "2.4"]
+  strategy: ["2.3", "3.2"]
+  static-rule: ["2.3"]
+  adaptive-strategy: ["2.3", "4.2"]
+  latency-prediction: ["2.1", "2.3"]
+  fallback: ["2.3", "4.2"]
+  queueing: ["2.1", "4.2"]
+  ewma: ["2.2"]
+  privacy: ["intro", "2.3"]
+  latency: ["1.4", "2.1", "3.2"]
+  rtt: ["2.1", "2.2"]
+  throughput: ["2.1", "2.2"]
+  jitter: ["2.2", "3.1"]
+  packet-loss: ["3.1"]
+  netem: ["3.1"]
+  network-profile: ["3.1", "3.2"]
+  network-probe: ["2.2"]
+  http: ["2.4"]
+  websocket: ["4.3"]
+  test-stand: ["3.1"]
+  sut: ["3.1"]
+  factor: ["3.2"]
+  full-factorial: ["3.2"]
+  experiment-run: ["3.2"]
+  randomization: ["3.2", "4.4"]
+  percentile: ["3.2", "4.2"]
+  tail-latency: ["1.4", "4.2"]
+  bootstrap: ["3.3"]
+  mann-whitney: ["3.3"]
+  cliffs-delta: ["3.3", "4.2"]
+  holm: ["3.3"]
+  aa-test: ["4.1"]
+  mde: ["4.1"]
+  validity-threats: ["4.4"]
+  repeatability: ["3.4"]
+  reproducibility: ["3.4"]
+  replicability: ["3.4"]
+  artifact: ["3.4"]
+  run-manifest: ["3.4"]
+  container: ["3.1"]
+  container-image: ["3.1", "3.4"]
+  oci: ["3.4"]
+  dockerfile: ["3.4"]
+  docker-compose: ["3.1"]
+  image-digest: ["3.4"]
+  lock-file: ["3.4"]
+  cgroups: ["3.1"]
+  container-registry: ["3.4"]
+  prometheus: ["3.1", "4.1"]
+  ci: ["3.4"]
+  rtf: ["2.1", "4.2"]
+  device-profile: ["3.1", "3.2"]
+  hypothesis: ["intro", "3.3", "4.2"]
+  blocking: ["3.2"]
+  censoring: ["3.2"]
+  opus: ["4.3"]
+  hedged-requests: ["4.3"]
+  wasm-threads: ["1.2", "4.3"]

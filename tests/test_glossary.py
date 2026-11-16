@@ -13,7 +13,7 @@ client = TestClient(app)
 
 def test_data_is_valid_and_large_enough():
     g = glossary()  # валидация в модели: id уникальны, связи и источники существуют
-    assert len(g.terms) >= 60
+    assert len(g.terms) >= 90
     assert sum(len(t.related) for t in g.terms) >= 80
     assert all(t.sources for t in g.terms)
 
@@ -86,3 +86,19 @@ def test_dictionary_server_compatible():
 def test_frontend_served():
     assert "Глоссарий ВКР" in client.get("/").text
     assert client.get("/static/app.js").status_code == 200
+
+
+def test_every_term_has_place_in_vkr_and_every_section_is_covered():
+    g = glossary()
+    secs = set(g.section_ids())
+    used = {s for t in g.terms for s in t.vkr}
+    assert all(t.vkr for t in g.terms)
+    assert used == secs, secs - used
+
+
+def test_vkr_outline_endpoint():
+    v = client.get("/api/vkr").json()
+    assert v[1]["sections"][0]["id"] == "1.1"
+    assert any(t["id"] == "whisper" for t in v[1]["sections"][0]["terms"])
+    card = client.get("/api/terms/adaptive-strategy").json()
+    assert card["vkr"][0]["id"] == "2.3"
