@@ -3,7 +3,26 @@
   const COLORS = {};
   const css = getComputedStyle(document.documentElement);
   const $ = (id) => document.getElementById(id);
-  const api = (p) => fetch(p).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  // Статическая версия (scripts/export_static.py): те же данные из JSON-снимка API, поиск — в браузере
+  const STATIC = document.documentElement.dataset.static === '1';
+  const get = (p) => fetch(p).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  const norm = (s) => s.toLowerCase().replaceAll('ё', 'е').replace(/\s+/g, ' ').trim();
+  let allTerms = null;
+  async function staticSearch(q) {
+    allTerms ??= await get('api/terms.json');
+    const w = norm(q);
+    return allTerms.map((t) => {
+      const n = norm(t.term), e = norm(t.en), d = norm(t.definition);
+      return [n.startsWith(w) || e.startsWith(w) ? 3 : n.includes(w) || e.includes(w) ? 2 : d.includes(w) ? 1 : 0, t];
+    }).filter(([s]) => s).sort((a, b) => b[0] - a[0] || a[1].term.localeCompare(b[1].term, 'ru')).map(([, t]) => t);
+  }
+  const api = (p) => {
+    if (!STATIC) return get(p);
+    const u = new URL(p, 'http://x');
+    if (u.pathname === '/api/terms' && u.searchParams.get('q')) return staticSearch(u.searchParams.get('q'));
+    if (u.pathname === '/api/terms') return get('api/terms.json');
+    return get(u.pathname.replace(/^\//, '') + '.json');
+  };
 
   const [graph, stats] = await Promise.all([api('/api/graph'), api('/api/stats')]);
   for (const c of Object.keys(graph.categories)) COLORS[c] = css.getPropertyValue(`--c-${c}`).trim() || '#888';
