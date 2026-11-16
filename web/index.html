@@ -3,65 +3,68 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Глоссарий ВКР — граф терминов</title>
-  <meta name="description" content="95 терминов ВКР о распознавании речи в браузере и на сервере: простыми словами, строгие определения, связи и источники">
+  <title>Глоссарий ВКР</title>
+  <meta name="description" content="Термины ВКР о распознавании речи в браузере и на сервере: простыми словами, определения, связи, источники и план диплома">
+  <meta name="theme-color" content="#1e1e1e">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="brand">
-      <h1>Глоссарий ВКР</h1>
-      <p>Распознавание речи: в браузере или на сервере — все термины работы простыми словами</p>
-    </div>
-    <div class="search">
-      <input id="q" type="search" placeholder="Найти термин: задержка, Whisper, WebGPU…" autocomplete="off" aria-label="Поиск термина">
-      <ul id="suggest" class="suggest" role="listbox" hidden></ul>
-    </div>
-    <nav class="views" aria-label="Вид">
-      <button data-view="graph" class="on">Граф</button>
-      <button data-view="vkr">План ВКР</button>
-      <button data-view="list">Список</button>
-      <a id="api-link" href="/docs" target="_blank" rel="noopener">API</a>
-    </nav>
-  </header>
-
-  <main>
-    <section id="graph-view" class="view on">
-      <div id="legend" class="legend" aria-label="Темы"></div>
-      <div id="cy" aria-label="Граф терминов"></div>
-      <p class="hint">Колёсико — приблизить, клик — открыть термин и его связи, клик по пустому месту — сбросить.</p>
-    </section>
-    <section id="vkr-view" class="view" aria-label="План ВКР"><div id="vkr"></div></section>
-    <section id="list-view" class="view" aria-label="Список терминов"><div id="list"></div></section>
-
-    <aside id="panel" class="panel" aria-live="polite">
-      <div id="intro">
-        <h2>Что это</h2>
-        <p>Словарь к дипломной работе о том, <b>где распознавать речь</b>: прямо в браузере (приватно, но зависит от мощности ноутбука) или на сервере (быстро, но зависит от интернета). Каждый термин объяснён простыми словами, а ниже — строгое определение с источником.</p>
-        <h3>С чего начать</h3>
-        <div id="start" class="chips"></div>
-        <p id="stats" class="muted"></p>
+  <div class="app">
+    <!-- левая панель: дерево тем и план ВКР -->
+    <aside class="side left" id="left">
+      <div class="side-head">
+        <div class="vault"><span class="vault-dot"></span>Глоссарий ВКР</div>
+        <button class="icon" id="open-search" title="Быстрый переход (⌘K)">⌕</button>
       </div>
-      <article id="card" hidden>
-        <p class="cat" id="c-cat"></p>
-        <h2 id="c-term"></h2>
-        <p class="en" id="c-en"></p>
-        <p class="badge" id="c-authored" hidden>Термин введён в ВКР</p>
-        <div class="simple"><span>Простыми словами</span><p id="c-simple"></p></div>
-        <h3>Где в ВКР</h3>
-        <div id="c-vkr" class="secs"></div>
-        <h3>Определение</h3>
-        <p id="c-def" class="def"></p>
-        <h3>Связано с</h3>
-        <div id="c-rel" class="chips"></div>
-        <details class="sources">
-          <summary>Источники (<span id="c-nsrc"></span>)</summary>
-          <ol id="c-src"></ol>
-        </details>
-        <p class="api">JSON: <a id="c-api" target="_blank" rel="noopener"></a></p>
-      </article>
+      <div class="side-tabs">
+        <button data-tree="files" class="on">Темы</button>
+        <button data-tree="vkr">План ВКР</button>
+      </div>
+      <nav id="tree-files" class="tree"></nav>
+      <nav id="tree-vkr" class="tree" hidden></nav>
+      <div class="side-foot" id="stats"></div>
     </aside>
-  </main>
+
+    <!-- центр: вкладки, граф и заметка -->
+    <main class="center">
+      <div class="tabbar">
+        <button class="mobile-only icon" id="toggle-left" title="Темы">☰</button>
+        <div class="tabs" id="tabs"></div>
+        <button class="search-pill" id="search-pill"><span>Поиск термина</span><kbd>⌘K</kbd></button>
+        <a class="icon" id="api-link" href="/docs" target="_blank" rel="noopener" title="Web API">{ }</a>
+      </div>
+      <section class="pane" id="graph-pane">
+        <div id="cy"></div>
+        <div class="graph-legend" id="legend"></div>
+        <div class="graph-hint">колёсико — масштаб · наведите — связи · клик — открыть заметку</div>
+      </section>
+      <section class="pane note-pane" id="note-pane" hidden>
+        <article class="note" id="note"></article>
+      </section>
+      <section class="pane note-pane" id="plan-pane" hidden>
+        <article class="note" id="plan"></article>
+      </section>
+    </main>
+
+    <!-- правая панель: локальный граф и ссылки -->
+    <aside class="side right" id="right">
+      <div class="panel-title">Локальный граф</div>
+      <div id="local-cy"></div>
+      <div class="panel-title">Обратные ссылки <span id="bl-count" class="count"></span></div>
+      <div id="backlinks" class="links"></div>
+      <div class="panel-title">Исходящие ссылки <span id="ol-count" class="count"></span></div>
+      <div id="outlinks" class="links"></div>
+    </aside>
+  </div>
+
+  <!-- быстрый переход -->
+  <div class="modal" id="switcher" hidden>
+    <div class="switcher">
+      <input id="q" type="search" placeholder="Найти термин…" autocomplete="off" aria-label="Поиск термина">
+      <ul id="results" role="listbox"></ul>
+      <div class="switcher-foot"><kbd>↑↓</kbd> выбрать <kbd>↵</kbd> открыть <kbd>esc</kbd> закрыть</div>
+    </div>
+  </div>
 
   <script src="/static/vendor/cytoscape-3.34.1.min.js"></script>
   <script src="/static/app.js"></script>
