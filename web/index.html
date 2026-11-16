@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Глоссарий ВКР — граф терминов</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Глоссарий ВКР</h1>
+      <p>Распределение распознавания речи между браузерным расширением и сервером</p>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="Найти термин: WebGPU, задержка, p95…" autocomplete="off" aria-label="Поиск термина">
+      <ul id="suggest" class="suggest" role="listbox" hidden></ul>
+    </div>
+    <nav class="views" aria-label="Вид">
+      <button data-view="graph" class="on">Граф</button>
+      <button data-view="list">Список</button>
+      <a href="/docs" target="_blank" rel="noopener">API</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="graph-view" class="view on">
+      <div id="legend" class="legend" aria-label="Категории"></div>
+      <div id="cy" aria-label="Граф терминов"></div>
+      <p class="hint">Колесо — масштаб, перетаскивание — сдвиг, клик по узлу — определение и соседи. Пунктир — авторские термины ВКР.</p>
+    </section>
+    <section id="list-view" class="view" aria-label="Список терминов"><div id="list"></div></section>
+
+    <aside id="panel" class="panel" aria-live="polite">
+      <div id="panel-empty" class="empty">
+        <p id="stats"></p>
+        <p>Выберите термин на графе или в поиске.</p>
+      </div>
+      <article id="card" hidden>
+        <p class="cat" id="c-cat"></p>
+        <h2 id="c-term"></h2>
+        <p class="en" id="c-en"></p>
+        <p class="authored" id="c-authored" hidden>Авторский термин ВКР</p>
+        <p id="c-def" class="def"></p>
+        <h3>Связи</h3>
+        <ul id="c-rel" class="rel"></ul>
+        <h3>Источники</h3>
+        <ol id="c-src" class="src"></ol>
+        <p class="api">JSON: <a id="c-api" target="_blank" rel="noopener"></a></p>
+      </article>
+    </aside>
+  </main>
+
+  <script src="/static/vendor/cytoscape-3.34.1.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

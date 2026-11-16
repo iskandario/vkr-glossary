@@ -1,0 +1,190 @@
+# Источники определений. id используется в glossary.yaml (поле sources).
+# type: paper — научная статья; standard — спецификация/стандарт; docs — официальная документация; book — книга; vkr — авторский термин ВКР
+- id: radford2023
+  type: paper
+  title: "Radford A., Kim J. W., Xu T., Brockman G., McLeavey C., Sutskever I. Robust Speech Recognition via Large-Scale Weak Supervision // Proceedings of ICML 2023. PMLR, vol. 202, pp. 28492–28518"
+  url: https://proceedings.mlr.press/v202/radford23a.html
+- id: vaswani2017
+  type: paper
+  title: "Vaswani A. et al. Attention Is All You Need // Advances in Neural Information Processing Systems 30 (NeurIPS 2017)"
+  url: https://arxiv.org/abs/1706.03762
+- id: kang2017
+  type: paper
+  title: "Kang Y. et al. Neurosurgeon: Collaborative Intelligence Between the Cloud and Mobile Edge // ASPLOS '17. ACM, 2017. pp. 615–629"
+  url: https://doi.org/10.1145/3037697.3037698
+- id: laskaridis2020
+  type: paper
+  title: "Laskaridis S. et al. SPINN: Synergistic Progressive Inference of Neural Networks over Device and Cloud // MobiCom '20. ACM, 2020"
+  url: https://doi.org/10.1145/3372224.3419194
+- id: wang2025
+  type: paper
+  title: "Wang Q. et al. Anatomizing Deep Learning Inference in Web Browsers // ACM TOSEM. 2025. Vol. 34, No. 2, Art. 47"
+  url: https://doi.org/10.1145/3688843
+- id: jia2024
+  type: paper
+  title: "Jia F. et al. Empowering In-Browser Deep Learning Inference on Edge Devices with Just-in-Time Kernel Optimizations // MobiSys '24. ACM, 2024"
+  url: https://doi.org/10.1145/3643832.3661892
+- id: karpov2021
+  type: paper
+  title: "Karpov N., Denisenko A., Minkin F. Golos: Russian Dataset for Speech Research // Proc. Interspeech 2021"
+  url: https://www.isca-archive.org/interspeech_2021/karpov21_interspeech.html
+- id: shi2016
+  type: paper
+  title: "Shi W., Cao J., Zhang Q., Li Y., Xu L. Edge Computing: Vision and Challenges // IEEE Internet of Things Journal. 2016. Vol. 3, No. 5. pp. 637–646"
+  url: https://doi.org/10.1109/JIOT.2016.2579198
+- id: jacob2018
+  type: paper
+  title: "Jacob B. et al. Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference // CVPR 2018. pp. 2704–2713"
+  url: https://arxiv.org/abs/1712.05877
+- id: dean2013
+  type: paper
+  title: "Dean J., Barroso L. A. The Tail at Scale // Communications of the ACM. 2013. Vol. 56, No. 2. pp. 74–80"
+  url: https://doi.org/10.1145/2408776.2408794
+- id: mann1947
+  type: paper
+  title: "Mann H. B., Whitney D. R. On a Test of Whether One of Two Random Variables Is Stochastically Larger than the Other // Annals of Mathematical Statistics. 1947. Vol. 18, No. 1. pp. 50–60"
+  url: https://doi.org/10.1214/aoms/1177730491
+- id: cliff1993
+  type: paper
+  title: "Cliff N. Dominance Statistics: Ordinal Analyses to Answer Ordinal Questions // Psychological Bulletin. 1993. Vol. 114, No. 3. pp. 494–509"
+  url: https://doi.org/10.1037/0033-2909.114.3.494
+- id: holm1979
+  type: paper
+  title: "Holm S. A Simple Sequentially Rejective Multiple Test Procedure // Scandinavian Journal of Statistics. 1979. Vol. 6, No. 2. pp. 65–70"
+  url: https://www.jstor.org/stable/4615733
+- id: roberts1959
+  type: paper
+  title: "Roberts S. W. Control Chart Tests Based on Geometric Moving Averages // Technometrics. 1959. Vol. 1, No. 3. pp. 239–250"
+  url: https://doi.org/10.1080/00401706.1959.10489860
+- id: efron1993
+  type: book
+  title: "Efron B., Tibshirani R. J. An Introduction to the Bootstrap. Chapman & Hall/CRC, 1993"
+  url: https://doi.org/10.1201/9780429246593
+- id: jain1991
+  type: book
+  title: "Jain R. The Art of Computer Systems Performance Analysis. Wiley, 1991"
+  url: https://www.cse.wustl.edu/~jain/books/perfbook.htm
+- id: wohlin2012
+  type: book
+  title: "Wohlin C. et al. Experimentation in Software Engineering. Springer, 2012"
+  url: https://doi.org/10.1007/978-3-642-29044-2
+- id: kohavi2020
+  type: book
+  title: "Kohavi R., Tang D., Xu Y. Trustworthy Online Controlled Experiments. Cambridge University Press, 2020"
+  url: https://doi.org/10.1017/9781108653985
+- id: acm-badging
+  type: standard
+  title: "Artifact Review and Badging — Current, Version 1.1. Association for Computing Machinery"
+  url: https://www.acm.org/publications/policies/artifact-review-and-badging-current
+- id: w3c-webgpu
+  type: standard
+  title: "WebGPU. W3C Candidate Recommendation"
+  url: https://www.w3.org/TR/webgpu/
+- id: w3c-wasm
+  type: standard
+  title: "WebAssembly Core Specification. W3C"
+  url: https://www.w3.org/TR/wasm-core-2/
+- id: whatwg-html-workers
+  type: standard
+  title: "HTML Living Standard. Section 10: Web workers. WHATWG"
+  url: https://html.spec.whatwg.org/multipage/workers.html
+- id: whatwg-fetch
+  type: standard
+  title: "Fetch Living Standard (CORS protocol). WHATWG"
+  url: https://fetch.spec.whatwg.org/#http-cors-protocol
+- id: w3c-webaudio
+  type: standard
+  title: "Web Audio API. W3C Recommendation"
+  url: https://www.w3.org/TR/webaudio/
+- id: w3c-mediacapture
+  type: standard
+  title: "Media Capture and Streams. W3C Candidate Recommendation"
+  url: https://www.w3.org/TR/mediacapture-streams/
+- id: rfc9110
+  type: standard
+  title: "RFC 9110. HTTP Semantics. IETF, 2022"
+  url: https://www.rfc-editor.org/rfc/rfc9110
+- id: rfc6455
+  type: standard
+  title: "RFC 6455. The WebSocket Protocol. IETF, 2011"
+  url: https://www.rfc-editor.org/rfc/rfc6455
+- id: rfc6298
+  type: standard
+  title: "RFC 6298. Computing TCP's Retransmission Timer. IETF, 2011"
+  url: https://www.rfc-editor.org/rfc/rfc6298
+- id: oci-image
+  type: standard
+  title: "Open Container Initiative. Image Format Specification"
+  url: https://github.com/opencontainers/image-spec
+- id: chrome-mv3
+  type: docs
+  title: "Chrome for Developers. What is Manifest V3?"
+  url: https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3
+- id: chrome-offscreen
+  type: docs
+  title: "Chrome for Developers. chrome.offscreen API"
+  url: https://developer.chrome.com/docs/extensions/reference/api/offscreen
+- id: chrome-sw
+  type: docs
+  title: "Chrome for Developers. Extension service workers"
+  url: https://developer.chrome.com/docs/extensions/develop/concepts/service-workers
+- id: cdp
+  type: docs
+  title: "Chrome DevTools Protocol"
+  url: https://chromedevtools.github.io/devtools-protocol/
+- id: playwright
+  type: docs
+  title: "Playwright Documentation"
+  url: https://playwright.dev/python/docs/intro
+- id: onnx
+  type: docs
+  title: "ONNX: Open Neural Network Exchange"
+  url: https://onnx.ai/onnx/intro/
+- id: ort-web
+  type: docs
+  title: "ONNX Runtime. Web (ONNX Runtime Web) documentation"
+  url: https://onnxruntime.ai/docs/tutorials/web/
+- id: transformers-js
+  type: docs
+  title: "Hugging Face. Transformers.js documentation"
+  url: https://huggingface.co/docs/transformers.js
+- id: faster-whisper
+  type: docs
+  title: "SYSTRAN. faster-whisper (GitHub)"
+  url: https://github.com/SYSTRAN/faster-whisper
+- id: ctranslate2
+  type: docs
+  title: "OpenNMT. CTranslate2 documentation"
+  url: https://opennmt.net/CTranslate2/
+- id: netem
+  type: docs
+  title: "tc-netem(8) — Linux manual page"
+  url: https://man7.org/linux/man-pages/man8/tc-netem.8.html
+- id: cgroups
+  type: docs
+  title: "Linux kernel documentation. Control Group v2"
+  url: https://docs.kernel.org/admin-guide/cgroup-v2.html
+- id: docker-docs
+  type: docs
+  title: "Docker Docs. Docker overview"
+  url: https://docs.docker.com/get-started/docker-overview/
+- id: compose-spec
+  type: docs
+  title: "Compose Specification"
+  url: https://docs.docker.com/reference/compose-file/
+- id: prometheus
+  type: docs
+  title: "Prometheus documentation. Overview"
+  url: https://prometheus.io/docs/introduction/overview/
+- id: uv-docs
+  type: docs
+  title: "Astral. uv documentation: Locking and syncing"
+  url: https://docs.astral.sh/uv/concepts/projects/sync/
+- id: gh-actions
+  type: docs
+  title: "GitHub Docs. Understanding GitHub Actions"
+  url: https://docs.github.com/en/actions/get-started/understand-github-actions
+- id: vkr
+  type: vkr
+  title: "Гарифуллин И. ВКР «Динамическое распределение вычислений между браузерным расширением и сервером при распознавании речи с учётом производительности устройства и состояния сети» (авторский термин модели, ПР3–ПР4)"
+  url: null

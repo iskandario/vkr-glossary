@@ -1,0 +1,66 @@
+# vkr-glossary
+
+Глоссарий терминов ВКР «Динамическое распределение вычислений между браузерным расширением и сервером
+при распознавании речи с учётом производительности устройства и состояния сети»:
+**95 терминов, 142 связи, 47 источников** (научные статьи, стандарты W3C/IETF/OCI, официальная документация).
+
+- **Web API** (FastAPI): термины, связи, источники, поиск, граф; совместимый с `brendanburns/dictionary-server` эндпоинт `/dictionary/{слово}`.
+- **Фронтенд** (Cytoscape.js 3.34.1): семантический граф с цветами категорий, поиском, карточкой термина и списком.
+- **Один контейнер** (~330 МБ), запускается без прав root и с read-only файловой системой.
+
+## Запуск
+
+```bash
+# Docker
+docker build -t vkr-glossary:1.0.0 .
+docker run -d -p 8080:8080 --read-only --tmpfs /tmp vkr-glossary:1.0.0
+# или
+docker compose up -d
+# без Docker (нужен uv)
+uv sync && uv run uvicorn app.main:app --port 8080
+```
+
+Фронтенд: http://localhost:8080 — документация API (OpenAPI/Swagger): http://localhost:8080/docs
+
+## API
+
+| Метод и путь | Что возвращает |
+|---|---|
+| `GET /api/terms?category=&q=&detail=` | список терминов (фильтр по категории, поиск, с определениями) |
+| `GET /api/terms/{id}` | термин: определение, источники, исходящие и входящие связи |
+| `GET /api/search?q=` | поиск по названию, английскому названию и определению (регистр и «ё» не важны) |
+| `GET /api/categories` | 7 категорий и число терминов |
+| `GET /api/sources`, `/api/sources/{id}` | источники и термины, которые на них ссылаются |
+| `GET /api/graph` | узлы и рёбра в формате Cytoscape.js |
+| `GET /api/stats` | сводка |
+| `GET /dictionary/{word}`, `GET /dictionary?word=` | определение текстом, как у dictionary-server |
+| `GET /health` | проверка живости (используется в HEALTHCHECK) |
+
+```bash
+curl localhost:8080/dictionary/WebGPU
+curl 'localhost:8080/api/search?q=задержка'
+curl localhost:8080/api/terms/adaptive-strategy
+```
+
+## Данные
+
+`data/glossary.yaml` — термины: `id`, `term`, `en`, `category`, `definition`, `sources`, `related` (тип связи:
+`is_a`, `part_of`, `uses`, `implements`, `measures`, `affects`, `alternative`, `related`), `authored: true` —
+авторский термин ВКР (9 штук; у каждого есть ссылка на ВКР и, где возможно, на родственную работу).
+`data/sources.yaml` — источники с URL/DOI.
+
+При старте данные проверяются (pydantic): уникальность id, существование связей и источников, известные категории.
+Тесты (`uv run pytest`) дополнительно проверяют связность графа, что каждый общепринятый термин имеет внешний источник
+и что каждый источник используется.
+
+## Структура
+
+```
+app/main.py        Web API и раздача фронтенда
+data/              glossary.yaml, sources.yaml
+web/               index.html, app.js, style.css, vendor/cytoscape-3.34.1.min.js (SHA-256 5141892e…)
+tests/             проверки данных и API
+scripts/screens.py скриншоты для отчёта (Playwright)
+docs/screens/      скриншоты
+Dockerfile, compose.yaml
+```

@@ -1,0 +1,931 @@
+# Глоссарий ВКР. Поля: id, term, en, category, definition, sources (id из sources.yaml),
+# related: список {to: id, type: is_a | part_of | uses | implements | measures | affects | alternative | related}.
+# authored: true — термин введён в ВКР (модель автора), а не общепринятый.
+
+categories:
+  asr: Распознавание речи
+  models: Модели и их исполнение
+  browser: Браузерная платформа
+  distributed: Распределение вычислений
+  network: Сеть
+  experiment: Эксперимент и статистика
+  devops: Контейнеризация и воспроизводимость
+
+terms:
+# ---------------- Распознавание речи ----------------
+- id: asr
+  term: "Автоматическое распознавание речи"
+  en: "Automatic Speech Recognition (ASR)"
+  category: asr
+  definition: "Преобразование звукового сигнала с речью в текст программными средствами. В ВКР — основная вычислительная задача, место выполнения которой выбирает планировщик."
+  sources: [radford2023]
+  related:
+    - {to: whisper, type: related}
+    - {to: wer, type: related}
+
+- id: whisper
+  term: "Whisper"
+  en: "Whisper"
+  category: asr
+  definition: "Семейство моделей распознавания речи OpenAI на архитектуре трансформера «кодировщик–декодировщик», обученных на 680 тыс. часов размеченного звука на многих языках. Размеры от tiny (39 млн параметров) до large; в стенде используется base (74 млн)."
+  sources: [radford2023]
+  related:
+    - {to: asr, type: implements}
+    - {to: encoder-decoder, type: uses}
+    - {to: log-mel, type: uses}
+
+- id: encoder-decoder
+  term: "Архитектура «кодировщик–декодировщик»"
+  en: "Encoder–decoder architecture"
+  category: asr
+  definition: "Схема нейросети, в которой кодировщик превращает входную последовательность (спектрограмму) в скрытое представление, а декодировщик по нему пошагово порождает выходные токены. У Whisper кодировщик обрабатывает всегда 30-секундное окно, поэтому его стоимость почти не зависит от длины фрагмента."
+  sources: [vaswani2017, radford2023]
+  related:
+    - {to: transformer, type: is_a}
+    - {to: token, type: uses}
+
+- id: transformer
+  term: "Трансформер"
+  en: "Transformer"
+  category: asr
+  definition: "Архитектура нейросети на механизме внимания (attention) без рекуррентных связей; основа современных моделей распознавания речи и обработки языка."
+  sources: [vaswani2017]
+  related:
+    - {to: whisper, type: related}
+
+- id: log-mel
+  term: "Лог-мел-спектрограмма"
+  en: "Log-Mel spectrogram"
+  category: asr
+  definition: "Представление звука как энергии в полосах мел-шкалы по коротким окнам времени, взятой в логарифме. Вход кодировщика Whisper (80 полос, окна 25 мс с шагом 10 мс, частота дискретизации 16 кГц)."
+  sources: [radford2023]
+  related:
+    - {to: speech-fragment, type: related}
+
+- id: token
+  term: "Токен"
+  en: "Token"
+  category: asr
+  definition: "Элементарная единица текста (часть слова, слово или служебный символ), которую порождает декодировщик за один шаг. Время декодирования растёт с числом токенов в ответе."
+  sources: [radford2023]
+  related:
+    - {to: greedy-decoding, type: related}
+
+- id: greedy-decoding
+  term: "Жадное декодирование"
+  en: "Greedy decoding"
+  category: asr
+  definition: "Способ порождения текста, при котором на каждом шаге выбирается самый вероятный токен. В стенде используется на обеих сторонах (beam_size = 1, температура 0), чтобы локальная и серверная модели давали сопоставимый текст."
+  sources: [radford2023, faster-whisper]
+  related:
+    - {to: beam-search, type: alternative}
+    - {to: token, type: uses}
+
+- id: beam-search
+  term: "Лучевой поиск"
+  en: "Beam search"
+  category: asr
+  definition: "Декодирование, при котором параллельно сохраняются несколько наиболее вероятных гипотез; обычно чуть точнее жадного, но дороже по времени."
+  sources: [radford2023]
+  related:
+    - {to: greedy-decoding, type: alternative}
+
+- id: wer
+  term: "Доля ошибочных слов"
+  en: "Word Error Rate (WER)"
+  category: asr
+  definition: "Метрика качества распознавания — (замены + удаления + вставки) / число слов эталона, считается по выравниванию гипотезы с эталоном. Сравнима только при одинаковой нормализации текста."
+  sources: [radford2023]
+  related:
+    - {to: text-normalization, type: uses}
+    - {to: asr, type: measures}
+
+- id: text-normalization
+  term: "Нормализация текста"
+  en: "Text normalization"
+  category: asr
+  definition: "Приведение эталона и гипотезы к общему виду перед подсчётом WER. В стенде — нижний регистр, «ё» → «е», числа → слова, без пунктуации."
+  sources: [radford2023]
+  related:
+    - {to: wer, type: part_of}
+
+- id: speech-fragment
+  term: "Фрагмент речи"
+  en: "Speech segment"
+  category: asr
+  definition: "Законченный отрезок речи (фраза, команда), который распознаётся как одно целое; в ВКР — единица решения планировщика. В стенде — записи Golos длиной 2–10 с."
+  sources: [vkr, karpov2021]
+  authored: true
+  related:
+    - {to: scheduler, type: related}
+    - {to: golos, type: part_of}
+
+- id: vad
+  term: "Детектор речевой активности"
+  en: "Voice Activity Detection (VAD)"
+  category: asr
+  definition: "Алгоритм, отделяющий участки с речью от тишины и шума; используется, чтобы нарезать непрерывный поток с микрофона на фрагменты."
+  sources: [faster-whisper]
+  related:
+    - {to: speech-fragment, type: related}
+
+- id: golos
+  term: "Golos"
+  en: "Golos dataset"
+  category: asr
+  definition: "Открытый корпус русской речи (около 1240 часов) с ручной разметкой, подготовленный SberDevices. В стенде используется 80 фрагментов тестовой части подкорпуса crowd."
+  sources: [karpov2021]
+  related:
+    - {to: wer, type: related}
+
+# ---------------- Модели и их исполнение ----------------
+- id: inference
+  term: "Инференс"
+  en: "Inference"
+  category: models
+  definition: "Применение обученной модели к новым данным для получения результата (здесь — текста по звуку), в отличие от обучения."
+  sources: [kang2017, wang2025]
+  related:
+    - {to: asr, type: related}
+
+- id: quantization
+  term: "Квантование модели"
+  en: "Quantization"
+  category: models
+  definition: "Перевод весов и вычислений модели из 32-битных чисел с плавающей точкой в целые 8 бит (или меньше). Уменьшает размер и ускоряет инференс ценой небольшой потери точности."
+  sources: [jacob2018]
+  related:
+    - {to: int8, type: related}
+    - {to: inference, type: affects}
+
+- id: int8
+  term: "INT8"
+  en: "8-bit integer precision"
+  category: models
+  definition: "Представление весов и активаций 8-битными целыми. В стенде обе стороны используют 8-битные веса Whisper base — q8 (ONNX) в браузере и int8 (CTranslate2) на сервере."
+  sources: [jacob2018, ctranslate2]
+  related:
+    - {to: quantization, type: is_a}
+
+- id: onnx
+  term: "ONNX"
+  en: "Open Neural Network Exchange"
+  category: models
+  definition: "Открытый формат описания нейросетей как графа операций; позволяет обучить модель в одном фреймворке и выполнять в другом рантайме."
+  sources: [onnx]
+  related:
+    - {to: onnx-runtime-web, type: related}
+
+- id: onnx-runtime-web
+  term: "ONNX Runtime Web"
+  en: "ONNX Runtime Web"
+  category: models
+  definition: "Версия движка ONNX Runtime для браузера: выполняет ONNX-модели на WebAssembly (CPU) или WebGPU (видеокарта)."
+  sources: [ort-web, wang2025]
+  related:
+    - {to: onnx, type: uses}
+    - {to: webassembly, type: uses}
+    - {to: webgpu, type: uses}
+
+- id: transformers-js
+  term: "Transformers.js"
+  en: "Transformers.js"
+  category: models
+  definition: "JavaScript-библиотека Hugging Face, которая запускает модели (в том числе Whisper) в браузере поверх ONNX Runtime Web и берёт на себя токенизацию и подготовку звука. В стенде — версия 3.8.1."
+  sources: [transformers-js]
+  related:
+    - {to: onnx-runtime-web, type: uses}
+    - {to: local-inference, type: implements}
+
+- id: ctranslate2
+  term: "CTranslate2"
+  en: "CTranslate2"
+  category: models
+  definition: "Библиотека быстрого инференса трансформеров на CPU и GPU с поддержкой квантования INT8."
+  sources: [ctranslate2]
+  related:
+    - {to: int8, type: uses}
+
+- id: faster-whisper
+  term: "faster-whisper"
+  en: "faster-whisper"
+  category: models
+  definition: "Реализация Whisper на CTranslate2; при той же точности работает в разы быстрее оригинальной реализации и экономнее по памяти. В стенде — серверная сторона (версия 1.1.0)."
+  sources: [faster-whisper]
+  related:
+    - {to: ctranslate2, type: uses}
+    - {to: whisper, type: implements}
+    - {to: server-inference, type: implements}
+
+- id: cold-start
+  term: "Холодный старт модели"
+  en: "Cold start"
+  category: models
+  definition: "Первый запуск модели, включающий загрузку весов, компиляцию и выделение памяти; заметно дольше последующих вызовов. Измеряется отдельно от рабочих замеров."
+  sources: [wang2025]
+  related:
+    - {to: warmup, type: related}
+
+- id: warmup
+  term: "Прогрев"
+  en: "Warm-up"
+  category: models
+  definition: "Несколько первых вызовов модели или прогонов, которые выполняются до замеров и не входят в анализ, чтобы исключить влияние холодного старта и кэшей."
+  sources: [jia2024, jain1991]
+  related:
+    - {to: cold-start, type: related}
+    - {to: experiment-run, type: part_of}
+
+# ---------------- Браузерная платформа ----------------
+- id: browser-extension
+  term: "Браузерное расширение"
+  en: "Browser extension"
+  category: browser
+  definition: "Программа, встраиваемая в браузер и расширяющая его функции через API расширений. В ВКР — клиентская часть, которая записывает речь и решает, где её распознавать."
+  sources: [chrome-mv3]
+  related:
+    - {to: manifest-v3, type: uses}
+    - {to: scheduler, type: part_of}
+
+- id: manifest-v3
+  term: "Manifest V3"
+  en: "Manifest V3"
+  category: browser
+  definition: "Текущая версия платформы расширений Chrome: фоновая логика выполняется в service worker, удалённый код запрещён, доступ к DOM и звуку — через отдельные документы."
+  sources: [chrome-mv3]
+  related:
+    - {to: extension-service-worker, type: uses}
+    - {to: offscreen-document, type: uses}
+
+- id: extension-service-worker
+  term: "Service worker расширения"
+  en: "Extension service worker"
+  category: browser
+  definition: "Фоновый обработчик событий расширения в Manifest V3; браузер выгружает его при простое, поэтому долгие задачи (запись звука, модель) выносятся в offscreen document."
+  sources: [chrome-sw]
+  related:
+    - {to: offscreen-document, type: related}
+
+- id: offscreen-document
+  term: "Offscreen document"
+  en: "Offscreen document"
+  category: browser
+  definition: "Скрытая страница расширения (chrome.offscreen) с доступом к DOM API — например, к записи звука и Web Worker. В ВКР в ней работают запись речи и локальная модель."
+  sources: [chrome-offscreen]
+  related:
+    - {to: web-worker, type: uses}
+    - {to: media-capture, type: uses}
+
+- id: web-worker
+  term: "Web Worker"
+  en: "Web Worker"
+  category: browser
+  definition: "Фоновый поток JavaScript, не блокирующий интерфейс страницы. В стенде локальный Whisper выполняется в воркере, а планировщик — в основном потоке."
+  sources: [whatwg-html-workers]
+  related:
+    - {to: local-inference, type: related}
+
+- id: webassembly
+  term: "WebAssembly"
+  en: "WebAssembly (Wasm)"
+  category: browser
+  definition: "Переносимый бинарный формат исполняемого кода для браузера с производительностью, близкой к нативной. Бэкенд ONNX Runtime Web для CPU; поддерживает SIMD и многопоточность."
+  sources: [w3c-wasm, wang2025]
+  related:
+    - {to: webgpu, type: alternative}
+
+- id: webgpu
+  term: "WebGPU"
+  en: "WebGPU"
+  category: browser
+  definition: "Браузерный API доступа к видеокарте для графики и вычислений; позволяет выполнять нейросети на GPU устройства. По данным исследований ускоряет инференс в браузере в разы по сравнению с Wasm, но доступен не на всех устройствах."
+  sources: [w3c-webgpu, wang2025, jia2024]
+  related:
+    - {to: webassembly, type: alternative}
+
+- id: web-audio
+  term: "Web Audio API"
+  en: "Web Audio API"
+  category: browser
+  definition: "Браузерный API обработки звука: декодирование, передискретизация, анализ сигнала. Используется для подготовки звука к модели (16 кГц, моно)."
+  sources: [w3c-webaudio]
+  related:
+    - {to: media-capture, type: related}
+
+- id: media-capture
+  term: "Захват медиапотока"
+  en: "Media Capture and Streams (getUserMedia)"
+  category: browser
+  definition: "API получения потока с микрофона или камеры с разрешения пользователя. Источник речи в расширении; в стенде заменён подачей записанных фрагментов в реальном времени."
+  sources: [w3c-mediacapture]
+  related:
+    - {to: speech-fragment, type: related}
+
+- id: cors
+  term: "CORS"
+  en: "Cross-Origin Resource Sharing"
+  category: browser
+  definition: "Протокол, по которому сервер разрешает странице с другого источника (origin) читать свои ответы. Нужен, чтобы клиент мог отправлять звук на сервер распознавания."
+  sources: [whatwg-fetch]
+  related:
+    - {to: server-inference, type: related}
+    - {to: http, type: part_of}
+
+- id: headless-browser
+  term: "Headless-браузер"
+  en: "Headless browser"
+  category: browser
+  definition: "Браузер без графического интерфейса, управляемый программно. В стенде — Chromium headless shell внутри контейнера."
+  sources: [playwright]
+  related:
+    - {to: playwright, type: related}
+
+- id: playwright
+  term: "Playwright"
+  en: "Playwright"
+  category: browser
+  definition: "Фреймворк автоматизации браузеров (Chromium, Firefox, WebKit). В стенде драйвер на Playwright открывает страницу клиента, запускает прогон и забирает результаты."
+  sources: [playwright]
+  related:
+    - {to: test-stand, type: part_of}
+    - {to: headless-browser, type: uses}
+    - {to: cdp, type: uses}
+
+- id: cdp
+  term: "Chrome DevTools Protocol"
+  en: "Chrome DevTools Protocol (CDP)"
+  category: browser
+  definition: "Протокол удалённого управления Chromium: навигация, сеть, эмуляция замедления CPU и сети, сбор метрик."
+  sources: [cdp]
+  related:
+    - {to: playwright, type: related}
+
+# ---------------- Распределение вычислений ----------------
+- id: edge-computing
+  term: "Граничные вычисления"
+  en: "Edge computing"
+  category: distributed
+  definition: "Выполнение вычислений рядом с источником данных (на устройстве пользователя или ближайшем узле), а не только в облаке, — ради меньшей задержки, экономии канала и приватности."
+  sources: [shi2016]
+  related:
+    - {to: offloading, type: related}
+
+- id: offloading
+  term: "Выгрузка вычислений"
+  en: "Computation offloading"
+  category: distributed
+  definition: "Перенос части или всей вычислительной задачи с устройства на сервер, когда это выгоднее по времени или энергии с учётом затрат на передачу данных."
+  sources: [kang2017, shi2016]
+  related:
+    - {to: edge-computing, type: related}
+    - {to: collaborative-inference, type: related}
+
+- id: collaborative-inference
+  term: "Совместный инференс устройство–облако"
+  en: "Device–cloud collaborative inference"
+  category: distributed
+  definition: "Схема, при которой инференс нейросети выполняется частично на устройстве и частично на сервере (по слоям, по входам или по запросам)."
+  sources: [kang2017, laskaridis2020]
+  related:
+    - {to: dnn-partitioning, type: related}
+    - {to: early-exit, type: related}
+
+- id: dnn-partitioning
+  term: "Разбиение нейросети по слоям"
+  en: "DNN partitioning"
+  category: distributed
+  definition: "Разрез модели между слоями: первые слои считаются на устройстве, промежуточный результат передаётся на сервер. Точка разреза выбирается по прогнозу задержки и энергии (Neurosurgeon)."
+  sources: [kang2017]
+  related:
+    - {to: collaborative-inference, type: is_a}
+    - {to: request-level-split, type: alternative}
+
+- id: early-exit
+  term: "Ранний выход"
+  en: "Early exit"
+  category: distributed
+  definition: "Дополнительные классификаторы внутри сети позволяют закончить инференс раньше, если уверенность достаточна; в SPINN сочетается с разбиением между устройством и облаком."
+  sources: [laskaridis2020]
+  related:
+    - {to: collaborative-inference, type: related}
+
+- id: request-level-split
+  term: "Распределение на уровне запросов"
+  en: "Request-level offloading"
+  category: distributed
+  definition: "Каждый запрос (здесь — фрагмент речи) целиком выполняется либо на устройстве, либо на сервере. Модель не разрезается, поэтому обе стороны используют готовые рантаймы. Подход ВКР."
+  sources: [vkr, kang2017]
+  authored: true
+  related:
+    - {to: offloading, type: is_a}
+    - {to: scheduler, type: related}
+
+- id: local-inference
+  term: "Локальное распознавание"
+  en: "On-device inference"
+  category: distributed
+  definition: "Распознавание фрагмента моделью в браузере пользователя. Звук не покидает устройство и работает без сети, но скорость зависит от мощности устройства."
+  sources: [wang2025, vkr]
+  related:
+    - {to: edge-computing, type: is_a}
+    - {to: privacy, type: affects}
+
+- id: server-inference
+  term: "Серверное распознавание"
+  en: "Server-side inference"
+  category: distributed
+  definition: "Распознавание фрагмента на сервере: звук передаётся по сети, поэтому задержка складывается из передачи, ожидания в очереди и работы модели."
+  sources: [kang2017, vkr]
+  related:
+    - {to: http, type: uses}
+    - {to: offloading, type: is_a}
+    - {to: latency, type: affects}
+
+- id: scheduler
+  term: "Планировщик распределения"
+  en: "Offloading scheduler"
+  category: distributed
+  definition: "Компонент расширения, который для каждого фрагмента речи решает, где его распознавать, — по правилу стратегии и текущим оценкам сети и устройства."
+  sources: [vkr]
+  authored: true
+  related:
+    - {to: strategy, type: uses}
+    - {to: latency-prediction, type: uses}
+
+- id: strategy
+  term: "Стратегия распределения"
+  en: "Offloading policy"
+  category: distributed
+  definition: "Правило выбора места распознавания. В ВКР сравниваются S1 — всегда локально, S2 — всегда сервер, S3 — статический порог по каналу, S4 — адаптивная."
+  sources: [vkr]
+  authored: true
+  related:
+    - {to: static-rule, type: related}
+    - {to: adaptive-strategy, type: related}
+
+- id: static-rule
+  term: "Статическое правило выбора"
+  en: "Static threshold policy"
+  category: distributed
+  definition: "Стратегия S3: фрагмент отправляется на сервер, если оценка пропускной способности канала выше заранее заданного порога (5 Мбит/с), иначе распознаётся локально. Не учитывает мощность устройства и очередь."
+  sources: [vkr]
+  authored: true
+  related:
+    - {to: strategy, type: is_a}
+    - {to: throughput, type: uses}
+
+- id: adaptive-strategy
+  term: "Адаптивная стратегия"
+  en: "Adaptive policy"
+  category: distributed
+  definition: "Стратегия S4: для каждого фрагмента прогнозирует задержку локально (очередь × время модели) и на сервере (передача + RTT + очередь + время модели) и выбирает меньшее; при превышении срока ответа сервера откатывается на локальное распознавание."
+  sources: [vkr, kang2017]
+  authored: true
+  related:
+    - {to: strategy, type: is_a}
+    - {to: latency-prediction, type: uses}
+    - {to: fallback, type: uses}
+
+- id: latency-prediction
+  term: "Прогноз задержки"
+  en: "Latency prediction"
+  category: distributed
+  definition: "Оценка времени до получения текста для каждого варианта выполнения по текущим измерениям. Аналог регрессионных моделей задержки слоёв в Neurosurgeon, но на уровне целого запроса."
+  sources: [kang2017, vkr]
+  related:
+    - {to: ewma, type: uses}
+    - {to: queueing, type: uses}
+
+- id: fallback
+  term: "Откат на локальное распознавание"
+  en: "Local fallback"
+  category: distributed
+  definition: "Если сервер не ответил в отведённый срок (2,5 прогноза, от 1,5 до 15 с) или сеть недоступна, фрагмент распознаётся локально. Обеспечивает работу без сети."
+  sources: [vkr]
+  authored: true
+  related:
+    - {to: local-inference, type: uses}
+
+- id: queueing
+  term: "Очередь распознавания"
+  en: "Inference queue"
+  category: distributed
+  definition: "Фрагменты, ожидающие свободную модель. При подаче речи в реальном времени медленное устройство не успевает за потоком, и задержка растёт с каждым фрагментом."
+  sources: [jain1991, vkr]
+  related:
+    - {to: latency, type: affects}
+
+- id: ewma
+  term: "Экспоненциальное сглаживание"
+  en: "Exponentially Weighted Moving Average (EWMA)"
+  category: distributed
+  definition: "Оценка xₜ = α·измерение + (1 − α)·xₜ₋₁; быстро реагирует на изменения и не хранит историю. В планировщике сглаживает RTT, пропускную способность и время модели."
+  sources: [roberts1959, rfc6298]
+  related:
+    - {to: latency-prediction, type: part_of}
+
+- id: privacy
+  term: "Конфиденциальность речевых данных"
+  en: "Speech data privacy"
+  category: distributed
+  definition: "Требование не передавать звук за пределы устройства без необходимости. Локальное распознавание удовлетворяет ему по построению; S4 уходит на сервер, только если это заметно быстрее."
+  sources: [shi2016, vkr]
+  related:
+    - {to: local-inference, type: related}
+
+# ---------------- Сеть ----------------
+- id: latency
+  term: "Задержка"
+  en: "Latency"
+  category: network
+  definition: "Время от события до результата. В ВКР — от момента окончания фрагмента речи до получения текста на странице, мс."
+  sources: [jain1991, vkr]
+  related:
+    - {to: tail-latency, type: related}
+
+- id: rtt
+  term: "Время кругового обращения"
+  en: "Round-Trip Time (RTT)"
+  category: network
+  definition: "Время от отправки пакета до получения ответа на него; минимальная сетевая составляющая любого запроса к серверу."
+  sources: [rfc6298]
+  related:
+    - {to: latency, type: part_of}
+    - {to: network-probe, type: related}
+
+- id: throughput
+  term: "Пропускная способность канала"
+  en: "Throughput / bandwidth"
+  category: network
+  definition: "Объём данных, передаваемых за единицу времени, бит/с. Определяет время отправки звука: 3,7 с речи в WAV 16 кГц ≈ 120 КБ ≈ 1 с при 1 Мбит/с."
+  sources: [jain1991]
+  related:
+    - {to: latency, type: affects}
+
+- id: jitter
+  term: "Джиттер"
+  en: "Jitter"
+  category: network
+  definition: "Разброс задержки пакетов во времени. Делает время передачи непредсказуемым и ухудшает хвост распределения задержки."
+  sources: [netem]
+  related:
+    - {to: latency, type: affects}
+
+- id: packet-loss
+  term: "Потеря пакетов"
+  en: "Packet loss"
+  category: network
+  definition: "Доля пакетов, не дошедших до получателя; в TCP вызывает повторные передачи и резкий рост времени передачи."
+  sources: [netem]
+  related:
+    - {to: throughput, type: affects}
+
+- id: netem
+  term: "Эмуляция сети (tc netem)"
+  en: "Network emulation (netem)"
+  category: network
+  definition: "Модуль ядра Linux, задающий на интерфейсе задержку, джиттер, потери и ограничение скорости. В стенде профили сети N1–N4 задаются netem внутри клиентского контейнера."
+  sources: [netem]
+  related:
+    - {to: network-profile, type: implements}
+
+- id: network-profile
+  term: "Профиль сети"
+  en: "Network profile"
+  category: network
+  definition: "Набор параметров канала, задающий уровень фактора «сеть»: N1 — 50 Мбит/с, 20 мс; N2 — 8 Мбит/с, 80 ± 20 мс; N3 — 1 Мбит/с, 250 мс, 2 % потерь; N4 — смена N1 и N3 каждые 20 с; N0 — нет сети."
+  sources: [vkr, netem]
+  authored: true
+  related:
+    - {to: factor, type: is_a}
+
+- id: network-probe
+  term: "Зонд сети"
+  en: "Active network probe"
+  category: network
+  definition: "Небольшой служебный запрос (ping 1 раз в секунду, 16 КБ раз в 3 секунды), по времени ответа которого оценивают RTT и пропускную способность. Создаёт собственный трафик, который учитывается в метриках."
+  sources: [vkr, rfc6298]
+  related:
+    - {to: rtt, type: measures}
+    - {to: throughput, type: measures}
+
+- id: http
+  term: "HTTP"
+  en: "Hypertext Transfer Protocol"
+  category: network
+  definition: "Протокол «запрос–ответ» прикладного уровня. Клиент стенда отправляет каждый фрагмент на сервер отдельным POST-запросом."
+  sources: [rfc9110]
+  related:
+    - {to: websocket, type: alternative}
+
+- id: websocket
+  term: "WebSocket"
+  en: "WebSocket"
+  category: network
+  definition: "Протокол постоянного двустороннего соединения поверх TCP; позволяет отправлять звук потоком без накладных расходов на установление запроса."
+  sources: [rfc6455]
+  related:
+    - {to: latency, type: affects}
+    - {to: http, type: alternative}
+
+# ---------------- Эксперимент и статистика ----------------
+- id: test-stand
+  term: "Экспериментальный стенд"
+  en: "Experimental testbed"
+  category: experiment
+  definition: "Воспроизводимое программное окружение для получения данных: объект исследования, источник воздействия, сбор измерений, хранилище результатов и анализ."
+  sources: [jain1991, acm-badging]
+  related:
+    - {to: sut, type: uses}
+    - {to: docker-compose, type: uses}
+
+- id: sut
+  term: "Объект исследования (SUT)"
+  en: "System Under Test"
+  category: experiment
+  definition: "Система, свойства которой измеряются. В стенде — планировщик в браузерном клиенте вместе с локальной моделью и сервер распознавания."
+  sources: [jain1991]
+  related:
+    - {to: test-stand, type: part_of}
+
+- id: factor
+  term: "Фактор и уровни"
+  en: "Factor and levels"
+  category: experiment
+  definition: "Независимая переменная эксперимента и её значения. В ВКР — стратегия (S1–S4), сеть (N1–N4) и устройство (D1–D3, квота CPU 1 / 0,5 / 0,25 ядра)."
+  sources: [jain1991, wohlin2012]
+  related:
+    - {to: full-factorial, type: part_of}
+
+- id: full-factorial
+  term: "Полный факторный план"
+  en: "Full factorial design"
+  category: experiment
+  definition: "План, в котором проверяются все сочетания уровней всех факторов: 4 × 4 × 3 = 48 конфигураций; позволяет оценить и взаимодействие факторов."
+  sources: [jain1991]
+  related:
+    - {to: experiment-run, type: uses}
+
+- id: experiment-run
+  term: "Прогон"
+  en: "Run (trial)"
+  category: experiment
+  definition: "Однократное выполнение одной конфигурации от начала до конца: прогрев, подача 20 фрагментов в реальном времени, сбор результатов. Единица анализа — значение p95 за прогон."
+  sources: [jain1991, vkr]
+  related:
+    - {to: percentile, type: uses}
+    - {to: run-manifest, type: uses}
+
+- id: randomization
+  term: "Рандомизация порядка прогонов"
+  en: "Run-order randomization"
+  category: experiment
+  definition: "Случайный (по фиксированному сиду) порядок прогонов, чтобы дрейф условий — нагрев, фоновые процессы — не совпадал с каким-то одним уровнем фактора."
+  sources: [wohlin2012, jain1991]
+  related:
+    - {to: validity-threats, type: related}
+
+- id: percentile
+  term: "Перцентиль p95"
+  en: "95th percentile"
+  category: experiment
+  definition: "Значение, не превышаемое 95 % наблюдений. p95 задержки показывает худшие случаи, которые замечает пользователь, — в отличие от среднего."
+  sources: [dean2013]
+  related:
+    - {to: tail-latency, type: measures}
+
+- id: tail-latency
+  term: "Хвостовая задержка"
+  en: "Tail latency"
+  category: experiment
+  definition: "Задержка в верхних перцентилях распределения (p95, p99). Для интерактивных систем важнее средней: редкие долгие ответы определяют восприятие."
+  sources: [dean2013]
+  related:
+    - {to: latency, type: is_a}
+
+- id: bootstrap
+  term: "Bootstrap-интервал"
+  en: "Bootstrap confidence interval"
+  category: experiment
+  definition: "Доверительный интервал, построенный многократной случайной выборкой с возвращением из имеющихся данных; не требует нормальности распределения."
+  sources: [efron1993]
+  related:
+    - {to: percentile, type: uses}
+    - {to: mann-whitney, type: related}
+
+- id: mann-whitney
+  term: "Тест Манна–Уитни"
+  en: "Mann–Whitney U test"
+  category: experiment
+  definition: "Непараметрический тест различия двух независимых выборок по рангам; подходит для задержек, распределение которых далеко от нормального."
+  sources: [mann1947]
+  related:
+    - {to: experiment-run, type: uses}
+    - {to: cliffs-delta, type: related}
+    - {to: holm, type: related}
+
+- id: cliffs-delta
+  term: "δ Клиффа"
+  en: "Cliff's delta"
+  category: experiment
+  definition: "Размер эффекта для порядковых данных — доля пар (a, b), где a > b, минус доля пар, где a < b; от −1 до 1. |δ| < 0,147 — пренебрежимо, < 0,33 — малый, < 0,474 — средний, иначе большой."
+  sources: [cliff1993]
+  related:
+    - {to: mann-whitney, type: related}
+
+- id: holm
+  term: "Поправка Холма"
+  en: "Holm–Bonferroni correction"
+  category: experiment
+  definition: "Пошаговая поправка p-значений при множественных сравнениях, контролирующая вероятность хотя бы одной ложной находки; мощнее поправки Бонферрони."
+  sources: [holm1979]
+  related:
+    - {to: mann-whitney, type: related}
+
+- id: aa-test
+  term: "A/A-тест"
+  en: "A/A test"
+  category: experiment
+  definition: "Сравнение двух групп прогонов одной и той же конфигурации. Значимого различия быть не должно; разброс показывает шум стенда и минимальный обнаружимый эффект."
+  sources: [kohavi2020]
+  related:
+    - {to: test-stand, type: measures}
+    - {to: mde, type: related}
+
+- id: mde
+  term: "Минимальный обнаружимый эффект"
+  en: "Minimum Detectable Effect (MDE)"
+  category: experiment
+  definition: "Наименьшая разница, которую эксперимент с данным числом повторов и шумом надёжно отличит от случайности (обычно при α = 0,05 и мощности 80 %)."
+  sources: [kohavi2020]
+  related:
+    - {to: cliffs-delta, type: related}
+    - {to: aa-test, type: related}
+
+- id: validity-threats
+  term: "Угрозы валидности"
+  en: "Threats to validity"
+  category: experiment
+  definition: "Причины, по которым вывод эксперимента может быть неверным: внутренние (эффект вызван не фактором), внешние (не переносится на реальность), конструктные (метрика измеряет не то), статистические."
+  sources: [wohlin2012]
+  related:
+    - {to: test-stand, type: related}
+    - {to: randomization, type: related}
+
+- id: repeatability
+  term: "Повторяемость"
+  en: "Repeatability"
+  category: experiment
+  definition: "Та же команда на том же стенде получает тот же результат (по терминологии ACM — «same team, same experimental setup»)."
+  sources: [acm-badging]
+  related:
+    - {to: reproducibility, type: related}
+
+- id: reproducibility
+  term: "Воспроизводимость"
+  en: "Reproducibility"
+  category: experiment
+  definition: "Другая команда на артефакте авторов (код, образы, данные) получает тот же результат."
+  sources: [acm-badging]
+  related:
+    - {to: replicability, type: related}
+    - {to: artifact, type: uses}
+
+- id: replicability
+  term: "Реплицируемость"
+  en: "Replicability"
+  category: experiment
+  definition: "Другая команда своей реализацией по описанию авторов получает согласующийся результат."
+  sources: [acm-badging]
+  related:
+    - {to: reproducibility, type: related}
+
+- id: artifact
+  term: "Артефакт исследования"
+  en: "Research artifact"
+  category: experiment
+  definition: "Опубликованные вместе с работой код, данные, образы и скрипты, позволяющие проверить результаты; ACM присваивает таким работам значки Available, Functional, Reusable, Reproduced."
+  sources: [acm-badging]
+  related:
+    - {to: container-image, type: uses}
+
+- id: run-manifest
+  term: "Манифест прогона"
+  en: "Run manifest"
+  category: experiment
+  definition: "JSON-файл с метаданными каждого прогона: параметры, сид, git-коммит, ID образов, характеристики машины, время, загрузка сервера. Позволяет проверить, на каком окружении получен результат."
+  sources: [vkr, acm-badging]
+  authored: true
+  related:
+    - {to: experiment-run, type: part_of}
+
+# ---------------- Контейнеризация и воспроизводимость ----------------
+- id: container
+  term: "Контейнер"
+  en: "Container"
+  category: devops
+  definition: "Изолированный процесс с собственной файловой системой, сетью и ограничениями ресурсов, работающий на общем ядре ОС; легче виртуальной машины."
+  sources: [docker-docs, cgroups]
+  related:
+    - {to: container-image, type: uses}
+    - {to: cgroups, type: uses}
+
+- id: container-image
+  term: "Образ контейнера"
+  en: "Container image"
+  category: devops
+  definition: "Неизменяемый набор слоёв файловой системы и настроек запуска, из которого создаются контейнеры; формат стандартизован OCI."
+  sources: [oci-image, docker-docs]
+  related:
+    - {to: image-digest, type: related}
+    - {to: dockerfile, type: related}
+
+- id: oci
+  term: "OCI"
+  en: "Open Container Initiative"
+  category: devops
+  definition: "Открытые стандарты формата образов, среды выполнения и реестров контейнеров; благодаря им образ, собранный Docker, запускается в Podman, containerd и Kubernetes."
+  sources: [oci-image]
+  related:
+    - {to: container-image, type: related}
+
+- id: dockerfile
+  term: "Dockerfile"
+  en: "Dockerfile"
+  category: devops
+  definition: "Текстовый рецепт сборки образа: базовый образ, команды установки, копирование кода, команда запуска."
+  sources: [docker-docs]
+  related:
+    - {to: container-image, type: related}
+
+- id: docker-compose
+  term: "Docker Compose"
+  en: "Docker Compose"
+  category: devops
+  definition: "Описание многоконтейнерного приложения в одном YAML-файле (сервисы, сети, тома, лимиты ресурсов) и запуск его одной командой."
+  sources: [compose-spec]
+  related:
+    - {to: container, type: uses}
+
+- id: image-digest
+  term: "Digest образа"
+  en: "Image digest"
+  category: devops
+  definition: "SHA-256 содержимого образа; в отличие от тега (например, latest) однозначно определяет версию и не меняется."
+  sources: [oci-image]
+  related:
+    - {to: container-image, type: part_of}
+
+- id: lock-file
+  term: "Lock-файл зависимостей"
+  en: "Lock file"
+  category: devops
+  definition: "Файл с точными версиями и хешами всех зависимостей (uv.lock, package-lock.json); сборка с флагом --frozen падает, если он не совпадает с описанием проекта."
+  sources: [uv-docs]
+  related:
+    - {to: reproducibility, type: affects}
+
+- id: cgroups
+  term: "Контрольные группы (cgroups)"
+  en: "Control groups v2"
+  category: devops
+  definition: "Механизм ядра Linux для ограничения и учёта ресурсов групп процессов. Квота CPU контейнера (cpu.max) в стенде задаёт уровень фактора «устройство»."
+  sources: [cgroups]
+  related:
+    - {to: factor, type: implements}
+
+- id: container-registry
+  term: "Реестр образов"
+  en: "Container registry"
+  category: devops
+  definition: "Сервис хранения и распространения образов контейнеров (Docker Hub, GitHub Container Registry, облачные и самостоятельно размещённые реестры)."
+  sources: [oci-image]
+  related:
+    - {to: container-image, type: related}
+
+- id: prometheus
+  term: "Prometheus"
+  en: "Prometheus"
+  category: devops
+  definition: "Система мониторинга, периодически опрашивающая (scrape) HTTP-эндпоинты /metrics и хранящая временные ряды. В стенде контролирует загрузку сервера во время прогонов."
+  sources: [prometheus]
+  related:
+    - {to: test-stand, type: part_of}
+
+- id: ci
+  term: "Непрерывная интеграция"
+  en: "Continuous Integration (CI)"
+  category: devops
+  definition: "Автоматическая сборка и проверка проекта при каждом изменении на чистой машине (GitHub Actions, GitLab CI); для стенда — независимый сокращённый прогон эксперимента."
+  sources: [gh-actions]
+  related:
+    - {to: reproducibility, type: affects}
+
+- id: web-api
+  term: "Web API"
+  en: "Web API"
+  category: devops
+  definition: "Программный интерфейс, доступный по HTTP: адреса (эндпоинты), методы и формат данных (обычно JSON). Глоссарий практики отдаёт термины, связи и источники через Web API."
+  sources: [rfc9110]
+  related:
+    - {to: http, type: uses}
