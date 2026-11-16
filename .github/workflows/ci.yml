@@ -24,11 +24,11 @@ jobs:
         run: docker build -t vkr-glossary:ci .
       - name: Проверка контейнера (read-only, non-root)
         run: |
-          docker run -d --name g -p 8080:8080 --read-only --tmpfs /tmp vkr-glossary:ci
+          docker run -d --name glossary -p 8080:8080 --read-only --tmpfs /tmp vkr-glossary:ci
           for i in $(seq 1 20); do curl -sf localhost:8080/health && break; sleep 1; done
           curl -sf localhost:8080/dictionary/WER | grep -q "Доля ошибочных слов"
           curl -sf localhost:8080/api/stats | grep -q '"terms":95'
-          test "$(docker exec g id -u)" = "10001"
+          test "$(docker exec glossary id -u)" = "10001"
       - name: Публикация в GHCR
         if: github.event_name != 'pull_request'
         run: |
