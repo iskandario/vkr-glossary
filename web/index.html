@@ -4,52 +4,65 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Глоссарий ВКР</title>
-  <meta name="description" content="Термины ВКР о распознавании речи в браузере и на сервере: простыми словами, определения, связи, источники и план диплома">
+  <meta name="description" content="Термины ВКР о распознавании речи в браузере и на сервере: граф знаний, простыми словами, определения, план диплома, свои заметки">
   <meta name="theme-color" content="#1e1e1e">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="app">
-    <!-- левая панель: дерево тем и план ВКР -->
+  <div class="app" id="app">
+    <!-- левая панель -->
     <aside class="side left" id="left">
       <div class="side-head">
         <div class="vault"><span class="vault-dot"></span>Глоссарий ВКР</div>
-        <button class="icon" id="open-search" title="Быстрый переход (⌘K)">⌕</button>
+        <div>
+          <button class="icon" id="new-note" title="Новая заметка (⌥N)">✎</button>
+          <button class="icon" id="open-search" title="Быстрый переход (⌘K)">⌕</button>
+        </div>
       </div>
       <div class="side-tabs">
         <button data-tree="files" class="on">Темы</button>
         <button data-tree="vkr">План ВКР</button>
+        <button data-tree="mine">Мои</button>
       </div>
       <nav id="tree-files" class="tree"></nav>
       <nav id="tree-vkr" class="tree" hidden></nav>
-      <div class="side-foot" id="stats"></div>
+      <nav id="tree-mine" class="tree" hidden></nav>
+      <div class="side-foot">
+        <span id="stats"></span>
+        <button class="link-btn" id="export-vault" title="Скачать всё как хранилище Obsidian">⇩ Экспорт в Obsidian</button>
+      </div>
     </aside>
 
-    <!-- центр: вкладки, граф и заметка -->
+    <!-- центр -->
     <main class="center">
       <div class="tabbar">
-        <button class="mobile-only icon" id="toggle-left" title="Темы">☰</button>
+        <button class="icon" id="toggle-left" title="Скрыть/показать левую панель">◧</button>
         <div class="tabs" id="tabs"></div>
-        <button class="search-pill" id="search-pill"><span>Поиск термина</span><kbd>⌘K</kbd></button>
+        <button class="search-pill" id="search-pill"><span>Поиск</span><kbd>⌘K</kbd></button>
         <a class="icon" id="api-link" href="/docs" target="_blank" rel="noopener" title="Web API">{ }</a>
+        <button class="icon" id="toggle-right" title="Скрыть/показать правую панель">◨</button>
       </div>
       <section class="pane" id="graph-pane">
-        <div id="cy"></div>
-        <div class="graph-legend" id="legend"></div>
-        <div class="graph-hint">колёсико — масштаб · наведите — связи · клик — открыть заметку</div>
+        <div id="graph"></div>
+        <div class="graph-tools">
+          <input id="graph-filter" type="search" placeholder="Фильтр графа…" autocomplete="off">
+          <button class="icon" id="graph-fit" title="Показать всё">⤢</button>
+          <button class="icon" id="graph-animate" title="Встряхнуть граф">✦</button>
+          <button class="icon" id="graph-settings-btn" title="Настройки графа">⚙</button>
+        </div>
+        <div class="graph-settings" id="graph-settings" hidden></div>
+        <div class="graph-hint">тяните узлы · колёсико — масштаб · клик — открыть</div>
       </section>
-      <section class="pane note-pane" id="note-pane" hidden>
-        <article class="note" id="note"></article>
-      </section>
-      <section class="pane note-pane" id="plan-pane" hidden>
-        <article class="note" id="plan"></article>
-      </section>
+      <section class="pane note-pane" id="note-pane" hidden><article class="note" id="note"></article></section>
+      <section class="pane note-pane" id="plan-pane" hidden><article class="note" id="plan"></article></section>
+      <section class="pane note-pane" id="mine-pane" hidden><article class="note" id="mine"></article></section>
     </main>
 
-    <!-- правая панель: локальный граф и ссылки -->
+    <!-- правая панель -->
     <aside class="side right" id="right">
-      <div class="panel-title">Локальный граф</div>
-      <div id="local-cy"></div>
+      <div class="panel-title"><span>Локальный граф</span>
+        <span class="depth">глубина <button data-depth="1" class="on">1</button><button data-depth="2">2</button></span></div>
+      <div id="local-graph"></div>
       <div class="panel-title">Обратные ссылки <span id="bl-count" class="count"></span></div>
       <div id="backlinks" class="links"></div>
       <div class="panel-title">Исходящие ссылки <span id="ol-count" class="count"></span></div>
@@ -60,13 +73,15 @@
   <!-- быстрый переход -->
   <div class="modal" id="switcher" hidden>
     <div class="switcher">
-      <input id="q" type="search" placeholder="Найти термин…" autocomplete="off" aria-label="Поиск термина">
+      <input id="q" type="search" placeholder="Найти термин или заметку…" autocomplete="off" aria-label="Поиск">
       <ul id="results" role="listbox"></ul>
       <div class="switcher-foot"><kbd>↑↓</kbd> выбрать <kbd>↵</kbd> открыть <kbd>esc</kbd> закрыть</div>
     </div>
   </div>
+  <!-- подсказки [[ссылок]] в редакторе -->
+  <ul class="ac" id="ac" hidden></ul>
 
-  <script src="/static/vendor/cytoscape-3.34.1.min.js"></script>
+  <script src="/static/vendor/force-graph-1.51.4.min.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

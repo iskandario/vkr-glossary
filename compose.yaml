@@ -3,7 +3,7 @@ name: vkr-glossary
 services:
   glossary:
     build: .
-    image: vkr-glossary:1.2.0
+    image: vkr-glossary:1.3.0
     ports: ["8080:8080"]
     read_only: true
     tmpfs: ["/tmp"]

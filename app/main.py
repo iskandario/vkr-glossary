@@ -30,7 +30,7 @@ from pydantic import BaseModel, model_validator
 ROOT = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("GLOSSARY_DATA", ROOT / "data"))
 WEB = Path(os.environ.get("GLOSSARY_WEB", ROOT / "web"))
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 RelType = Literal["is_a", "part_of", "uses", "implements", "measures", "affects", "alternative", "related"]
 REL_LABELS = {"is_a": "является видом", "part_of": "часть", "uses": "использует", "implements": "реализует",
@@ -186,7 +186,7 @@ def api_categories() -> list[dict]:
 @app.get("/api/terms")
 def api_terms(category: str | None = None, q: str | None = None, detail: bool = False) -> list[dict]:
     terms = search_terms(q) if q else sorted(glossary().terms, key=lambda t: norm(t.term))
-    return [{**brief(t), **({"definition": t.definition} if detail else {})}
+    return [{**brief(t), **({"definition": t.definition, "vkr": t.vkr} if detail else {})}
             for t in terms if category is None or t.category == category]
 
 
